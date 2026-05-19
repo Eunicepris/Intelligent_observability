@@ -1,0 +1,4 @@
+algorithme,systeme,seuil,VP,FP,FN,precision,rappel,f1
+Z-score,Train Ticket,3.0,129,0,6,1.0,0.9556,0.9773
+Isolation Forest,Train Ticket,contamination=0.05,123,0,12,1.0,0.9111,0.9535
+Autoencoder,Train Ticket,percentile_80,39,0,96,1.0,0.2889,0.4483
