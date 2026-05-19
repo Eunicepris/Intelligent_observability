@@ -210,5 +210,5 @@ Les pannes de type `exception` et `return` restent non détectables par les mét
 
 ---
 
-*Rapport dans le cadre du projet de maîtrise en génie logiciel — Détection d'anomalies dans les systèmes microservices*  
+*Rapport fait dans le cadre du projet de maîtrise en génie logiciel — Détection d'anomalies dans les systèmes microservices*  
 *Dataset : Nezha (Yu et al., FSE 2023) — github.com/IntelligentDDS/Nezha*
