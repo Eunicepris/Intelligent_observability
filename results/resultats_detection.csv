@@ -8,3 +8,11 @@ LSTM DeepLog,Train Ticket,taux_anomalie>0.03,131,0,4,1.0,0.9704,0.985,logs
 Random Forest,Train Ticket,class_weight=balanced,134,0,1,1.0,0.9926,0.9963,metriques
 SVM,Train Ticket,"kernel=rbf, balanced",133,0,2,1.0,0.9852,0.9925,logs
 Comptage templates,Train Ticket,templates nouveaux,34,0,101,1.0,0.252,0.402,logs
+Seuil latence,Train Ticket,duree_max>mean+3std,104,0,31,1.0,0.77,0.87,traces
+Z-score,Train Ticket,3.0,133,0,2,1.0,0.985,0.993,traces
+Isolation Forest,Train Ticket,contamination=0.3,40,1,95,0.976,0.296,0.455,traces
+SVM,Train Ticket,"kernel=rbf, balanced",115,0,20,1.0,0.852,0.92,traces
+Autoencoder,Train Ticket,percentile_50,135,1,0,0.993,1.0,0.996,traces
+DBSCAN,Train Ticket,"eps=0.5, min=5",104,1,31,0.99,0.77,0.867,traces
+Random Forest,Train Ticket,class_weight=balanced,135,0,0,1.0,1.0,1.0,traces
+LSTM,Train Ticket,taux_anomalie>0.01,55,0,80,1.0,0.407,0.579,traces
