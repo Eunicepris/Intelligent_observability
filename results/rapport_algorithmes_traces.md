@@ -213,5 +213,5 @@ Le Z-score multi-features est l'algorithme non supervisé le plus performant sur
 
 ---
 
-*Rapport généré dans le cadre du projet de maîtrise en génie logiciel*
+*Rapport dans le cadre du projet de maîtrise en génie logiciel*
 *Dataset : Nezha (Yu et al., FSE 2023)*
