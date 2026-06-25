@@ -17,3 +17,7 @@ Autoencoder,Train Ticket,percentile_50,135,1,0,0.993,1.0,0.996,traces
 DBSCAN,Train Ticket,"eps=0.5, min=5",104,1,31,0.99,0.77,0.867,traces
 Random Forest,Train Ticket,class_weight=balanced,135,0,0,1.0,1.0,1.0,traces
 LSTM,Train Ticket,taux_anomalie>0.01,55,0,80,1.0,0.407,0.579,traces
+Z-score,Online Boutique,3.0,96,0,72,1.0,0.5714,0.7273,metriques
+Isolation Forest,Online Boutique,contamination=0.10,132,0,36,1.0,0.7857,0.88,metriques
+Random Forest,Online Boutique,class_weight=balanced,117,0,51,1.0,0.6964,0.8211,metriques
+Autoencoder V2,Online Boutique,par_fenetre_P50,168,1,0,0.9941,1.0,0.997,metriques
