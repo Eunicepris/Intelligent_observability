@@ -1,169 +1,169 @@
-date,window,is_anomaly,faulty_service,fault_type,inject_time,minutes_since_inject,inject_pod
-2022-08-22,03_53,1,frontend,cpu_contention,2022-08-22 03:53:54,0,frontend-579b9bff58-t2dbm
-2022-08-22,03_54,1,frontend,cpu_contention,2022-08-22 03:53:54,1,frontend-579b9bff58-t2dbm
-2022-08-22,03_55,1,frontend,cpu_contention,2022-08-22 03:53:54,2,frontend-579b9bff58-t2dbm
-2022-08-22,04_02,1,frontend,return,2022-08-22 04:02:07,0,frontend-579b9bff58-t2dbm
-2022-08-22,04_03,1,frontend,return,2022-08-22 04:02:07,1,frontend-579b9bff58-t2dbm
-2022-08-22,04_04,1,frontend,return,2022-08-22 04:02:07,2,frontend-579b9bff58-t2dbm
-2022-08-22,04_10,1,frontend,cpu_consumed,2022-08-22 04:10:20,0,frontend-579b9bff58-t2dbm
-2022-08-22,04_11,1,frontend,cpu_consumed,2022-08-22 04:10:20,1,frontend-579b9bff58-t2dbm
-2022-08-22,04_12,1,frontend,cpu_consumed,2022-08-22 04:10:20,2,frontend-579b9bff58-t2dbm
-2022-08-22,04_18,1,frontend,exception,2022-08-22 04:18:35,0,frontend-579b9bff58-t2dbm
-2022-08-22,04_19,1,frontend,exception,2022-08-22 04:18:35,1,frontend-579b9bff58-t2dbm
-2022-08-22,04_20,1,frontend,exception,2022-08-22 04:18:35,2,frontend-579b9bff58-t2dbm
-2022-08-22,04_27,1,cartservice,network_delay,2022-08-22 04:27:03,0,cartservice-579f59597d-wc2lz
-2022-08-22,04_28,1,cartservice,network_delay,2022-08-22 04:27:03,1,cartservice-579f59597d-wc2lz
-2022-08-22,04_29,1,cartservice,network_delay,2022-08-22 04:27:03,2,cartservice-579f59597d-wc2lz
-2022-08-22,04_36,1,cartservice,cpu_contention,2022-08-22 04:36:03,0,cartservice-579f59597d-wc2lz
-2022-08-22,04_37,1,cartservice,cpu_contention,2022-08-22 04:36:03,1,cartservice-579f59597d-wc2lz
-2022-08-22,04_38,1,cartservice,cpu_contention,2022-08-22 04:36:03,2,cartservice-579f59597d-wc2lz
-2022-08-22,04_44,1,checkoutservice,cpu_contention,2022-08-22 04:44:16,0,checkoutservice-578fcf4766-9csqn
-2022-08-22,04_45,1,checkoutservice,cpu_contention,2022-08-22 04:44:16,1,checkoutservice-578fcf4766-9csqn
-2022-08-22,04_46,1,checkoutservice,cpu_contention,2022-08-22 04:44:16,2,checkoutservice-578fcf4766-9csqn
-2022-08-22,04_52,1,checkoutservice,network_delay,2022-08-22 04:52:55,0,checkoutservice-578fcf4766-9csqn
-2022-08-22,04_53,1,checkoutservice,network_delay,2022-08-22 04:52:55,1,checkoutservice-578fcf4766-9csqn
-2022-08-22,04_54,1,checkoutservice,network_delay,2022-08-22 04:52:55,2,checkoutservice-578fcf4766-9csqn
-2022-08-22,05_01,1,checkoutservice,exception,2022-08-22 05:01:13,0,checkoutservice-578fcf4766-9csqn
-2022-08-22,05_02,1,checkoutservice,exception,2022-08-22 05:01:13,1,checkoutservice-578fcf4766-9csqn
-2022-08-22,05_03,1,checkoutservice,exception,2022-08-22 05:01:13,2,checkoutservice-578fcf4766-9csqn
-2022-08-22,05_09,1,checkoutservice,return,2022-08-22 05:09:50,0,checkoutservice-578fcf4766-9csqn
-2022-08-22,05_10,1,checkoutservice,return,2022-08-22 05:09:50,1,checkoutservice-578fcf4766-9csqn
-2022-08-22,05_11,1,checkoutservice,return,2022-08-22 05:09:50,2,checkoutservice-578fcf4766-9csqn
-2022-08-22,05_18,1,currencyservice,cpu_contention,2022-08-22 05:18:09,0,currencyservice-cf787dd48-vpjrd
-2022-08-22,05_19,1,currencyservice,cpu_contention,2022-08-22 05:18:09,1,currencyservice-cf787dd48-vpjrd
-2022-08-22,05_20,1,currencyservice,cpu_contention,2022-08-22 05:18:09,2,currencyservice-cf787dd48-vpjrd
-2022-08-22,05_27,1,currencyservice,network_delay,2022-08-22 05:27:06,0,currencyservice-cf787dd48-vpjrd
-2022-08-22,05_28,1,currencyservice,network_delay,2022-08-22 05:27:06,1,currencyservice-cf787dd48-vpjrd
-2022-08-22,05_29,1,currencyservice,network_delay,2022-08-22 05:27:06,2,currencyservice-cf787dd48-vpjrd
-2022-08-22,05_35,1,emailservice,cpu_contention,2022-08-22 05:35:34,0,emailservice-55fdc5b988-f6xth
-2022-08-22,05_36,1,emailservice,cpu_contention,2022-08-22 05:35:34,1,emailservice-55fdc5b988-f6xth
-2022-08-22,05_37,1,emailservice,cpu_contention,2022-08-22 05:35:34,2,emailservice-55fdc5b988-f6xth
-2022-08-22,05_43,1,emailservice,network_delay,2022-08-22 05:43:48,0,emailservice-55fdc5b988-f6xth
-2022-08-22,05_44,1,emailservice,network_delay,2022-08-22 05:43:48,1,emailservice-55fdc5b988-f6xth
-2022-08-22,05_45,1,emailservice,network_delay,2022-08-22 05:43:48,2,emailservice-55fdc5b988-f6xth
-2022-08-22,05_52,1,paymentservice,network_delay,2022-08-22 05:52:54,0,paymentservice-9cdb6588f-554sm
-2022-08-22,05_53,1,paymentservice,network_delay,2022-08-22 05:52:54,1,paymentservice-9cdb6588f-554sm
-2022-08-22,05_54,1,paymentservice,network_delay,2022-08-22 05:52:54,2,paymentservice-9cdb6588f-554sm
-2022-08-22,06_01,1,paymentservice,cpu_contention,2022-08-22 06:01:18,0,paymentservice-9cdb6588f-554sm
-2022-08-22,06_02,1,paymentservice,cpu_contention,2022-08-22 06:01:18,1,paymentservice-9cdb6588f-554sm
-2022-08-22,06_03,1,paymentservice,cpu_contention,2022-08-22 06:01:18,2,paymentservice-9cdb6588f-554sm
-2022-08-22,06_35,1,productcatalogservice,cpu_consumed,2022-08-22 06:35:39,0,productcatalogservice-668d5f85fb-wckp8
-2022-08-22,06_36,1,productcatalogservice,cpu_consumed,2022-08-22 06:35:39,1,productcatalogservice-668d5f85fb-wckp8
-2022-08-22,06_37,1,productcatalogservice,cpu_consumed,2022-08-22 06:35:39,2,productcatalogservice-668d5f85fb-wckp8
-2022-08-22,06_52,1,recommendationservice,network_delay,2022-08-22 06:52:56,0,recommendationservice-6cfdd55578-gfj6q
-2022-08-22,06_53,1,recommendationservice,network_delay,2022-08-22 06:52:56,1,recommendationservice-6cfdd55578-gfj6q
-2022-08-22,06_54,1,recommendationservice,network_delay,2022-08-22 06:52:56,2,recommendationservice-6cfdd55578-gfj6q
-2022-08-22,07_01,1,recommendationservice,cpu_contention,2022-08-22 07:01:25,0,recommendationservice-6cfdd55578-gfj6q
-2022-08-22,07_02,1,recommendationservice,cpu_contention,2022-08-22 07:01:25,1,recommendationservice-6cfdd55578-gfj6q
-2022-08-22,07_03,1,recommendationservice,cpu_contention,2022-08-22 07:01:25,2,recommendationservice-6cfdd55578-gfj6q
-2022-08-22,07_10,1,recommendationservice,cpu_consumed,2022-08-22 07:10:43,0,recommendationservice-6cfdd55578-gfj6q
-2022-08-22,07_11,1,recommendationservice,cpu_consumed,2022-08-22 07:10:43,1,recommendationservice-6cfdd55578-gfj6q
-2022-08-22,07_12,1,recommendationservice,cpu_consumed,2022-08-22 07:10:43,2,recommendationservice-6cfdd55578-gfj6q
-2022-08-22,07_17,1,shippingservice,network_delay,2022-08-22 07:17:55,0,shippingservice-7b598fc7d-lmggd
-2022-08-22,07_18,1,shippingservice,network_delay,2022-08-22 07:17:55,1,shippingservice-7b598fc7d-lmggd
-2022-08-22,07_19,1,shippingservice,network_delay,2022-08-22 07:17:55,2,shippingservice-7b598fc7d-lmggd
-2022-08-22,07_26,1,shippingservice,cpu_contention,2022-08-22 07:26:48,0,shippingservice-7b598fc7d-lmggd
-2022-08-22,07_27,1,shippingservice,cpu_contention,2022-08-22 07:26:48,1,shippingservice-7b598fc7d-lmggd
-2022-08-22,07_28,1,shippingservice,cpu_contention,2022-08-22 07:26:48,2,shippingservice-7b598fc7d-lmggd
-2022-08-22,07_44,1,adservice,return,2022-08-22 07:44:20,0,adservice-5f6585d649-fnmft
-2022-08-22,07_45,1,adservice,return,2022-08-22 07:44:20,1,adservice-5f6585d649-fnmft
-2022-08-22,07_46,1,adservice,return,2022-08-22 07:44:20,2,adservice-5f6585d649-fnmft
-2022-08-22,07_53,1,adservice,exception,2022-08-22 07:53:33,0,adservice-5f6585d649-fnmft
-2022-08-22,07_54,1,adservice,exception,2022-08-22 07:53:33,1,adservice-5f6585d649-fnmft
-2022-08-22,07_55,1,adservice,exception,2022-08-22 07:53:33,2,adservice-5f6585d649-fnmft
-2022-08-23,12_01,1,frontend,cpu_contention,2022-08-23 12:01:25,0,frontend-579b9bff58-t2dbm
-2022-08-23,12_02,1,frontend,cpu_contention,2022-08-23 12:01:25,1,frontend-579b9bff58-t2dbm
-2022-08-23,12_03,1,frontend,cpu_contention,2022-08-23 12:01:25,2,frontend-579b9bff58-t2dbm
-2022-08-23,12_10,1,frontend,return,2022-08-23 12:10:21,0,frontend-579b9bff58-t2dbm
-2022-08-23,12_11,1,frontend,return,2022-08-23 12:10:21,1,frontend-579b9bff58-t2dbm
-2022-08-23,12_12,1,frontend,return,2022-08-23 12:10:21,2,frontend-579b9bff58-t2dbm
-2022-08-23,12_18,1,frontend,cpu_consumed,2022-08-23 12:18:23,0,frontend-579b9bff58-t2dbm
-2022-08-23,12_19,1,frontend,cpu_consumed,2022-08-23 12:18:23,1,frontend-579b9bff58-t2dbm
-2022-08-23,12_20,1,frontend,cpu_consumed,2022-08-23 12:18:23,2,frontend-579b9bff58-t2dbm
-2022-08-23,12_27,1,frontend,exception,2022-08-23 12:27:23,0,frontend-579b9bff58-t2dbm
-2022-08-23,12_28,1,frontend,exception,2022-08-23 12:27:23,1,frontend-579b9bff58-t2dbm
-2022-08-23,12_29,1,frontend,exception,2022-08-23 12:27:23,2,frontend-579b9bff58-t2dbm
-2022-08-23,12_35,1,cartservice,network_delay,2022-08-23 12:35:57,0,cartservice-579f59597d-wc2lz
-2022-08-23,12_36,1,cartservice,network_delay,2022-08-23 12:35:57,1,cartservice-579f59597d-wc2lz
-2022-08-23,12_37,1,cartservice,network_delay,2022-08-23 12:35:57,2,cartservice-579f59597d-wc2lz
-2022-08-23,12_45,1,cartservice,cpu_contention,2022-08-23 12:45:08,0,cartservice-579f59597d-wc2lz
-2022-08-23,12_46,1,cartservice,cpu_contention,2022-08-23 12:45:08,1,cartservice-579f59597d-wc2lz
-2022-08-23,12_47,1,cartservice,cpu_contention,2022-08-23 12:45:08,2,cartservice-579f59597d-wc2lz
-2022-08-23,12_53,1,checkoutservice,network_delay,2022-08-23 12:53:52,0,checkoutservice-578fcf4766-9csqn
-2022-08-23,12_54,1,checkoutservice,network_delay,2022-08-23 12:53:52,1,checkoutservice-578fcf4766-9csqn
-2022-08-23,12_55,1,checkoutservice,network_delay,2022-08-23 12:53:52,2,checkoutservice-578fcf4766-9csqn
-2022-08-23,13_02,1,checkoutservice,exception,2022-08-23 13:02:09,0,checkoutservice-578fcf4766-9csqn
-2022-08-23,13_03,1,checkoutservice,exception,2022-08-23 13:02:09,1,checkoutservice-578fcf4766-9csqn
-2022-08-23,13_04,1,checkoutservice,exception,2022-08-23 13:02:09,2,checkoutservice-578fcf4766-9csqn
-2022-08-23,13_10,1,checkoutservice,return,2022-08-23 13:10:36,0,checkoutservice-578fcf4766-9csqn
-2022-08-23,13_11,1,checkoutservice,return,2022-08-23 13:10:36,1,checkoutservice-578fcf4766-9csqn
-2022-08-23,13_12,1,checkoutservice,return,2022-08-23 13:10:36,2,checkoutservice-578fcf4766-9csqn
-2022-08-23,13_19,1,checkoutservice,cpu_consumed,2022-08-23 13:19:06,0,checkoutservice-578fcf4766-9csqn
-2022-08-23,13_20,1,checkoutservice,cpu_consumed,2022-08-23 13:19:06,1,checkoutservice-578fcf4766-9csqn
-2022-08-23,13_21,1,checkoutservice,cpu_consumed,2022-08-23 13:19:06,2,checkoutservice-578fcf4766-9csqn
-2022-08-23,13_27,1,currencyservice,cpu_contention,2022-08-23 13:27:51,0,currencyservice-cf787dd48-vpjrd
-2022-08-23,13_28,1,currencyservice,cpu_contention,2022-08-23 13:27:51,1,currencyservice-cf787dd48-vpjrd
-2022-08-23,13_29,1,currencyservice,cpu_contention,2022-08-23 13:27:51,2,currencyservice-cf787dd48-vpjrd
-2022-08-23,13_37,1,currencyservice,network_delay,2022-08-23 13:37:08,0,currencyservice-cf787dd48-vpjrd
-2022-08-23,13_38,1,currencyservice,network_delay,2022-08-23 13:37:08,1,currencyservice-cf787dd48-vpjrd
-2022-08-23,13_39,1,currencyservice,network_delay,2022-08-23 13:37:08,2,currencyservice-cf787dd48-vpjrd
-2022-08-23,13_45,1,emailservice,cpu_contention,2022-08-23 13:45:53,0,emailservice-55fdc5b988-f6xth
-2022-08-23,13_46,1,emailservice,cpu_contention,2022-08-23 13:45:53,1,emailservice-55fdc5b988-f6xth
-2022-08-23,13_47,1,emailservice,cpu_contention,2022-08-23 13:45:53,2,emailservice-55fdc5b988-f6xth
-2022-08-23,13_54,1,emailservice,network_delay,2022-08-23 13:54:37,0,emailservice-55fdc5b988-f6xth
-2022-08-23,13_55,1,emailservice,network_delay,2022-08-23 13:54:37,1,emailservice-55fdc5b988-f6xth
-2022-08-23,13_56,1,emailservice,network_delay,2022-08-23 13:54:37,2,emailservice-55fdc5b988-f6xth
-2022-08-23,14_03,1,emailservice,cpu_consumed,2022-08-23 14:03:48,0,emailservice-55fdc5b988-f6xth
-2022-08-23,14_04,1,emailservice,cpu_consumed,2022-08-23 14:03:48,1,emailservice-55fdc5b988-f6xth
-2022-08-23,14_05,1,emailservice,cpu_consumed,2022-08-23 14:03:48,2,emailservice-55fdc5b988-f6xth
-2022-08-23,14_12,1,paymentservice,network_delay,2022-08-23 14:12:52,0,paymentservice-9cdb6588f-554sm
-2022-08-23,14_13,1,paymentservice,network_delay,2022-08-23 14:12:52,1,paymentservice-9cdb6588f-554sm
-2022-08-23,14_14,1,paymentservice,network_delay,2022-08-23 14:12:52,2,paymentservice-9cdb6588f-554sm
-2022-08-23,14_21,1,paymentservice,cpu_contention,2022-08-23 14:21:54,0,paymentservice-9cdb6588f-554sm
-2022-08-23,14_22,1,paymentservice,cpu_contention,2022-08-23 14:21:54,1,paymentservice-9cdb6588f-554sm
-2022-08-23,14_23,1,paymentservice,cpu_contention,2022-08-23 14:21:54,2,paymentservice-9cdb6588f-554sm
-2022-08-23,14_30,1,productcatalogservice,network_delay,2022-08-23 14:30:10,0,productcatalogservice-668d5f85fb-jhwx9
-2022-08-23,14_31,1,productcatalogservice,network_delay,2022-08-23 14:30:10,1,productcatalogservice-668d5f85fb-jhwx9
-2022-08-23,14_32,1,productcatalogservice,network_delay,2022-08-23 14:30:10,2,productcatalogservice-668d5f85fb-jhwx9
-2022-08-23,14_47,1,productcatalogservice,return,2022-08-23 14:47:40,0,productcatalogservice-668d5f85fb-jhwx9
-2022-08-23,14_48,1,productcatalogservice,return,2022-08-23 14:47:40,1,productcatalogservice-668d5f85fb-jhwx9
-2022-08-23,14_49,1,productcatalogservice,return,2022-08-23 14:47:40,2,productcatalogservice-668d5f85fb-jhwx9
-2022-08-23,14_55,1,productcatalogservice,cpu_consumed,2022-08-23 14:55:55,0,productcatalogservice-668d5f85fb-jhwx9
-2022-08-23,14_56,1,productcatalogservice,cpu_consumed,2022-08-23 14:55:55,1,productcatalogservice-668d5f85fb-jhwx9
-2022-08-23,14_57,1,productcatalogservice,cpu_consumed,2022-08-23 14:55:55,2,productcatalogservice-668d5f85fb-jhwx9
-2022-08-23,15_04,1,productcatalogservice,exception,2022-08-23 15:04:28,0,productcatalogservice-668d5f85fb-jhwx9
-2022-08-23,15_05,1,productcatalogservice,exception,2022-08-23 15:04:28,1,productcatalogservice-668d5f85fb-jhwx9
-2022-08-23,15_06,1,productcatalogservice,exception,2022-08-23 15:04:28,2,productcatalogservice-668d5f85fb-jhwx9
-2022-08-23,15_12,1,recommendationservice,network_delay,2022-08-23 15:12:49,0,recommendationservice-6cfdd55578-gfj6q
-2022-08-23,15_13,1,recommendationservice,network_delay,2022-08-23 15:12:49,1,recommendationservice-6cfdd55578-gfj6q
-2022-08-23,15_14,1,recommendationservice,network_delay,2022-08-23 15:12:49,2,recommendationservice-6cfdd55578-gfj6q
-2022-08-23,15_21,1,recommendationservice,cpu_contention,2022-08-23 15:21:41,0,recommendationservice-6cfdd55578-gfj6q
-2022-08-23,15_22,1,recommendationservice,cpu_contention,2022-08-23 15:21:41,1,recommendationservice-6cfdd55578-gfj6q
-2022-08-23,15_23,1,recommendationservice,cpu_contention,2022-08-23 15:21:41,2,recommendationservice-6cfdd55578-gfj6q
-2022-08-23,15_29,1,recommendationservice,cpu_consumed,2022-08-23 15:29:49,0,recommendationservice-6cfdd55578-gfj6q
-2022-08-23,15_30,1,recommendationservice,cpu_consumed,2022-08-23 15:29:49,1,recommendationservice-6cfdd55578-gfj6q
-2022-08-23,15_31,1,recommendationservice,cpu_consumed,2022-08-23 15:29:49,2,recommendationservice-6cfdd55578-gfj6q
-2022-08-23,15_38,1,shippingservice,network_delay,2022-08-23 15:38:52,0,shippingservice-7b598fc7d-lmggd
-2022-08-23,15_39,1,shippingservice,network_delay,2022-08-23 15:38:52,1,shippingservice-7b598fc7d-lmggd
-2022-08-23,15_40,1,shippingservice,network_delay,2022-08-23 15:38:52,2,shippingservice-7b598fc7d-lmggd
-2022-08-23,15_47,1,shippingservice,cpu_contention,2022-08-23 15:47:43,0,shippingservice-7b598fc7d-lmggd
-2022-08-23,15_48,1,shippingservice,cpu_contention,2022-08-23 15:47:43,1,shippingservice-7b598fc7d-lmggd
-2022-08-23,15_49,1,shippingservice,cpu_contention,2022-08-23 15:47:43,2,shippingservice-7b598fc7d-lmggd
-2022-08-23,15_56,1,shippingservice,cpu_consumed,2022-08-23 15:56:24,0,shippingservice-7b598fc7d-lmggd
-2022-08-23,15_57,1,shippingservice,cpu_consumed,2022-08-23 15:56:24,1,shippingservice-7b598fc7d-lmggd
-2022-08-23,15_58,1,shippingservice,cpu_consumed,2022-08-23 15:56:24,2,shippingservice-7b598fc7d-lmggd
-2022-08-23,16_05,1,adservice,network_delay,2022-08-23 16:05:02,0,adservice-5f6585d649-fnmft
-2022-08-23,16_06,1,adservice,network_delay,2022-08-23 16:05:02,1,adservice-5f6585d649-fnmft
-2022-08-23,16_07,1,adservice,network_delay,2022-08-23 16:05:02,2,adservice-5f6585d649-fnmft
-2022-08-23,16_13,1,adservice,return,2022-08-23 16:13:38,0,adservice-5f6585d649-fnmft
-2022-08-23,16_14,1,adservice,return,2022-08-23 16:13:38,1,adservice-5f6585d649-fnmft
-2022-08-23,16_15,1,adservice,return,2022-08-23 16:13:38,2,adservice-5f6585d649-fnmft
-2022-08-23,16_22,1,adservice,exception,2022-08-23 16:22:53,0,adservice-5f6585d649-fnmft
-2022-08-23,16_23,1,adservice,exception,2022-08-23 16:22:53,1,adservice-5f6585d649-fnmft
-2022-08-23,16_24,1,adservice,exception,2022-08-23 16:22:53,2,adservice-5f6585d649-fnmft
-2022-08-23,16_31,1,adservice,cpu_contention,2022-08-23 16:31:35,0,adservice-5f6585d649-fnmft
-2022-08-23,16_32,1,adservice,cpu_contention,2022-08-23 16:31:35,1,adservice-5f6585d649-fnmft
-2022-08-23,16_33,1,adservice,cpu_contention,2022-08-23 16:31:35,2,adservice-5f6585d649-fnmft
-2022-08-23,16_40,1,adservice,cpu_consumed,2022-08-23 16:40:57,0,adservice-5f6585d649-fnmft
-2022-08-23,16_41,1,adservice,cpu_consumed,2022-08-23 16:40:57,1,adservice-5f6585d649-fnmft
-2022-08-23,16_42,1,adservice,cpu_consumed,2022-08-23 16:40:57,2,adservice-5f6585d649-fnmft
+date,window,is_anomaly,faulty_service,fault_type
+2022-08-22,03_53,1,frontend,cpu_contention
+2022-08-22,03_54,1,frontend,cpu_contention
+2022-08-22,03_55,1,frontend,cpu_contention
+2022-08-22,04_02,1,frontend,return
+2022-08-22,04_03,1,frontend,return
+2022-08-22,04_04,1,frontend,return
+2022-08-22,04_10,1,frontend,cpu_consumed
+2022-08-22,04_11,1,frontend,cpu_consumed
+2022-08-22,04_12,1,frontend,cpu_consumed
+2022-08-22,04_18,1,frontend,exception
+2022-08-22,04_19,1,frontend,exception
+2022-08-22,04_20,1,frontend,exception
+2022-08-22,04_27,1,cartservice,network_delay
+2022-08-22,04_28,1,cartservice,network_delay
+2022-08-22,04_29,1,cartservice,network_delay
+2022-08-22,04_36,1,cartservice,cpu_contention
+2022-08-22,04_37,1,cartservice,cpu_contention
+2022-08-22,04_38,1,cartservice,cpu_contention
+2022-08-22,04_44,1,checkoutservice,cpu_contention
+2022-08-22,04_45,1,checkoutservice,cpu_contention
+2022-08-22,04_46,1,checkoutservice,cpu_contention
+2022-08-22,04_52,1,checkoutservice,network_delay
+2022-08-22,04_53,1,checkoutservice,network_delay
+2022-08-22,04_54,1,checkoutservice,network_delay
+2022-08-22,05_01,1,checkoutservice,exception
+2022-08-22,05_02,1,checkoutservice,exception
+2022-08-22,05_03,1,checkoutservice,exception
+2022-08-22,05_09,1,checkoutservice,return
+2022-08-22,05_10,1,checkoutservice,return
+2022-08-22,05_11,1,checkoutservice,return
+2022-08-22,05_18,1,currencyservice,cpu_contention
+2022-08-22,05_19,1,currencyservice,cpu_contention
+2022-08-22,05_20,1,currencyservice,cpu_contention
+2022-08-22,05_27,1,currencyservice,network_delay
+2022-08-22,05_28,1,currencyservice,network_delay
+2022-08-22,05_29,1,currencyservice,network_delay
+2022-08-22,05_35,1,emailservice,cpu_contention
+2022-08-22,05_36,1,emailservice,cpu_contention
+2022-08-22,05_37,1,emailservice,cpu_contention
+2022-08-22,05_43,1,emailservice,network_delay
+2022-08-22,05_44,1,emailservice,network_delay
+2022-08-22,05_45,1,emailservice,network_delay
+2022-08-22,05_52,1,paymentservice,network_delay
+2022-08-22,05_53,1,paymentservice,network_delay
+2022-08-22,05_54,1,paymentservice,network_delay
+2022-08-22,06_01,1,paymentservice,cpu_contention
+2022-08-22,06_02,1,paymentservice,cpu_contention
+2022-08-22,06_03,1,paymentservice,cpu_contention
+2022-08-22,06_35,1,productcatalogservice,cpu_consumed
+2022-08-22,06_36,1,productcatalogservice,cpu_consumed
+2022-08-22,06_37,1,productcatalogservice,cpu_consumed
+2022-08-22,06_52,1,recommendationservice,network_delay
+2022-08-22,06_53,1,recommendationservice,network_delay
+2022-08-22,06_54,1,recommendationservice,network_delay
+2022-08-22,07_01,1,recommendationservice,cpu_contention
+2022-08-22,07_02,1,recommendationservice,cpu_contention
+2022-08-22,07_03,1,recommendationservice,cpu_contention
+2022-08-22,07_10,1,recommendationservice,cpu_consumed
+2022-08-22,07_11,1,recommendationservice,cpu_consumed
+2022-08-22,07_12,1,recommendationservice,cpu_consumed
+2022-08-22,07_17,1,shippingservice,network_delay
+2022-08-22,07_18,1,shippingservice,network_delay
+2022-08-22,07_19,1,shippingservice,network_delay
+2022-08-22,07_26,1,shippingservice,cpu_contention
+2022-08-22,07_27,1,shippingservice,cpu_contention
+2022-08-22,07_28,1,shippingservice,cpu_contention
+2022-08-22,07_44,1,adservice,return
+2022-08-22,07_45,1,adservice,return
+2022-08-22,07_46,1,adservice,return
+2022-08-22,07_53,1,adservice,exception
+2022-08-22,07_54,1,adservice,exception
+2022-08-22,07_55,1,adservice,exception
+2022-08-23,12_01,1,frontend,cpu_contention
+2022-08-23,12_02,1,frontend,cpu_contention
+2022-08-23,12_03,1,frontend,cpu_contention
+2022-08-23,12_10,1,frontend,return
+2022-08-23,12_11,1,frontend,return
+2022-08-23,12_12,1,frontend,return
+2022-08-23,12_18,1,frontend,cpu_consumed
+2022-08-23,12_19,1,frontend,cpu_consumed
+2022-08-23,12_20,1,frontend,cpu_consumed
+2022-08-23,12_27,1,frontend,exception
+2022-08-23,12_28,1,frontend,exception
+2022-08-23,12_29,1,frontend,exception
+2022-08-23,12_35,1,cartservice,network_delay
+2022-08-23,12_36,1,cartservice,network_delay
+2022-08-23,12_37,1,cartservice,network_delay
+2022-08-23,12_45,1,cartservice,cpu_contention
+2022-08-23,12_46,1,cartservice,cpu_contention
+2022-08-23,12_47,1,cartservice,cpu_contention
+2022-08-23,12_53,1,checkoutservice,network_delay
+2022-08-23,12_54,1,checkoutservice,network_delay
+2022-08-23,12_55,1,checkoutservice,network_delay
+2022-08-23,13_02,1,checkoutservice,exception
+2022-08-23,13_03,1,checkoutservice,exception
+2022-08-23,13_04,1,checkoutservice,exception
+2022-08-23,13_10,1,checkoutservice,return
+2022-08-23,13_11,1,checkoutservice,return
+2022-08-23,13_12,1,checkoutservice,return
+2022-08-23,13_19,1,checkoutservice,cpu_consumed
+2022-08-23,13_20,1,checkoutservice,cpu_consumed
+2022-08-23,13_21,1,checkoutservice,cpu_consumed
+2022-08-23,13_27,1,currencyservice,cpu_contention
+2022-08-23,13_28,1,currencyservice,cpu_contention
+2022-08-23,13_29,1,currencyservice,cpu_contention
+2022-08-23,13_37,1,currencyservice,network_delay
+2022-08-23,13_38,1,currencyservice,network_delay
+2022-08-23,13_39,1,currencyservice,network_delay
+2022-08-23,13_45,1,emailservice,cpu_contention
+2022-08-23,13_46,1,emailservice,cpu_contention
+2022-08-23,13_47,1,emailservice,cpu_contention
+2022-08-23,13_54,1,emailservice,network_delay
+2022-08-23,13_55,1,emailservice,network_delay
+2022-08-23,13_56,1,emailservice,network_delay
+2022-08-23,14_03,1,emailservice,cpu_consumed
+2022-08-23,14_04,1,emailservice,cpu_consumed
+2022-08-23,14_05,1,emailservice,cpu_consumed
+2022-08-23,14_12,1,paymentservice,network_delay
+2022-08-23,14_13,1,paymentservice,network_delay
+2022-08-23,14_14,1,paymentservice,network_delay
+2022-08-23,14_21,1,paymentservice,cpu_contention
+2022-08-23,14_22,1,paymentservice,cpu_contention
+2022-08-23,14_23,1,paymentservice,cpu_contention
+2022-08-23,14_30,1,productcatalogservice,network_delay
+2022-08-23,14_31,1,productcatalogservice,network_delay
+2022-08-23,14_32,1,productcatalogservice,network_delay
+2022-08-23,14_47,1,productcatalogservice,return
+2022-08-23,14_48,1,productcatalogservice,return
+2022-08-23,14_49,1,productcatalogservice,return
+2022-08-23,14_55,1,productcatalogservice,cpu_consumed
+2022-08-23,14_56,1,productcatalogservice,cpu_consumed
+2022-08-23,14_57,1,productcatalogservice,cpu_consumed
+2022-08-23,15_04,1,productcatalogservice,exception
+2022-08-23,15_05,1,productcatalogservice,exception
+2022-08-23,15_06,1,productcatalogservice,exception
+2022-08-23,15_12,1,recommendationservice,network_delay
+2022-08-23,15_13,1,recommendationservice,network_delay
+2022-08-23,15_14,1,recommendationservice,network_delay
+2022-08-23,15_21,1,recommendationservice,cpu_contention
+2022-08-23,15_22,1,recommendationservice,cpu_contention
+2022-08-23,15_23,1,recommendationservice,cpu_contention
+2022-08-23,15_29,1,recommendationservice,cpu_consumed
+2022-08-23,15_30,1,recommendationservice,cpu_consumed
+2022-08-23,15_31,1,recommendationservice,cpu_consumed
+2022-08-23,15_38,1,shippingservice,network_delay
+2022-08-23,15_39,1,shippingservice,network_delay
+2022-08-23,15_40,1,shippingservice,network_delay
+2022-08-23,15_47,1,shippingservice,cpu_contention
+2022-08-23,15_48,1,shippingservice,cpu_contention
+2022-08-23,15_49,1,shippingservice,cpu_contention
+2022-08-23,15_56,1,shippingservice,cpu_consumed
+2022-08-23,15_57,1,shippingservice,cpu_consumed
+2022-08-23,15_58,1,shippingservice,cpu_consumed
+2022-08-23,16_05,1,adservice,network_delay
+2022-08-23,16_06,1,adservice,network_delay
+2022-08-23,16_07,1,adservice,network_delay
+2022-08-23,16_13,1,adservice,return
+2022-08-23,16_14,1,adservice,return
+2022-08-23,16_15,1,adservice,return
+2022-08-23,16_22,1,adservice,exception
+2022-08-23,16_23,1,adservice,exception
+2022-08-23,16_24,1,adservice,exception
+2022-08-23,16_31,1,adservice,cpu_contention
+2022-08-23,16_32,1,adservice,cpu_contention
+2022-08-23,16_33,1,adservice,cpu_contention
+2022-08-23,16_40,1,adservice,cpu_consumed
+2022-08-23,16_41,1,adservice,cpu_consumed
+2022-08-23,16_42,1,adservice,cpu_consumed
