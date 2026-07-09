@@ -31,3 +31,9 @@ TF-IDF,Online Boutique,similarité<0.7,147,0,21,1.0,0.875,0.9333,logs
 Random Forest,Online Boutique,class_weight=balanced,168,0,0,1.0,1.0,1.0,logs
 SVM,Online Boutique,"kernel=rbf, balanced",44,0,124,1.0,0.2619,0.4151,logs
 LSTM DeepLog,Online Boutique,"top_K=5, taux>0.01",0,0,168,0.0,0.0,0.0,logs
+LOF,Train Ticket,"n_neighbors=20, contamination=0.05",124,0,11,1.0,0.9185,0.9575,metriques
+LOF,Online Boutique,"n_neighbors=20, contamination=0.05",107,0,61,1.0,0.6369,0.7782,metriques
+XGBoost,Train Ticket,scale_pos_weight=balanced,133,0,2,1.0,0.9852,0.9925,metriques
+XGBoost,Online Boutique,scale_pos_weight=balanced,139,0,29,1.0,0.8274,0.9055,metriques
+One-Class SVM,Train Ticket,"kernel=rbf, nu=0.05",128,0,7,1.0,0.9481,0.9734,metriques
+One-Class SVM,Online Boutique,"kernel=rbf, nu=0.05",106,0,62,1.0,0.631,0.7737,metriques
