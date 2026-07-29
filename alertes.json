@@ -68,5 +68,159 @@
     },
     "services_suspects": [],
     "action": "Signal faible — vérifier la modalité concernée"
+  },
+  {
+    "timestamp": "2026-07-29T00:53:28.997636",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 08_43",
+    "severite": "WARNING",
+    "confiance": 0.6666666666666666,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Alerte modérée — investigation à planifier"
+  },
+  {
+    "timestamp": "2026-07-29T01:00:50.039071",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 08_43",
+    "severite": "WARNING",
+    "confiance": 0.6666666666666666,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Alerte modérée — investigation à planifier"
+  },
+  {
+    "timestamp": "2026-07-29T01:09:04.023232",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 08_43",
+    "severite": "WARNING",
+    "confiance": 0.6666666666666666,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Alerte modérée — investigation à planifier"
+  },
+  {
+    "timestamp": "2026-07-29T01:09:04.859396",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 10_28",
+    "severite": "CRITICAL",
+    "confiance": 1.0,
+    "modalites": {
+      "metriques": true,
+      "logs": true,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Action immédiate requise — investigation prioritaire"
+  },
+  {
+    "timestamp": "2026-07-29T01:09:05.545026",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 08_43",
+    "severite": "WARNING",
+    "confiance": 0.6666666666666666,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Alerte modérée — investigation à planifier"
+  },
+  {
+    "timestamp": "2026-07-29T01:09:06.149064",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 08_44",
+    "severite": "CRITICAL",
+    "confiance": 1.0,
+    "modalites": {
+      "metriques": true,
+      "logs": true,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Action immédiate requise — investigation prioritaire"
+  },
+  {
+    "timestamp": "2026-07-29T01:09:06.823815",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 08_45",
+    "severite": "WARNING",
+    "confiance": 0.6666666666666666,
+    "modalites": {
+      "metriques": true,
+      "logs": true,
+      "traces": false
+    },
+    "services_suspects": [],
+    "action": "Alerte modérée — investigation à planifier"
+  },
+  {
+    "timestamp": "2026-07-29T01:09:07.441358",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 11_06",
+    "severite": "CRITICAL",
+    "confiance": 1.0,
+    "modalites": {
+      "metriques": true,
+      "logs": true,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Action immédiate requise — investigation prioritaire"
+  },
+  {
+    "timestamp": "2026-07-29T01:09:08.095148",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 14_24",
+    "severite": "CRITICAL",
+    "confiance": 1.0,
+    "modalites": {
+      "metriques": true,
+      "logs": true,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Action immédiate requise — investigation prioritaire"
+  },
+  {
+    "timestamp": "2026-07-29T01:09:09.065115",
+    "systeme": "online_boutique",
+    "fenetre": "2022-08-22 03_53",
+    "severite": "LOW",
+    "confiance": 0.3333333333333333,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": false
+    },
+    "services_suspects": [],
+    "action": "Signal faible — vérifier la modalité concernée"
+  },
+  {
+    "timestamp": "2026-07-29T01:09:09.840622",
+    "systeme": "online_boutique",
+    "fenetre": "2022-08-22 04_02",
+    "severite": "LOW",
+    "confiance": 0.3333333333333333,
+    "modalites": {
+      "metriques": false,
+      "logs": false,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Signal faible — vérifier la modalité concernée"
   }
 ]
