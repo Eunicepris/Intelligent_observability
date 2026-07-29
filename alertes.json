@@ -1,0 +1,72 @@
+[
+  {
+    "timestamp": "2026-07-28T23:49:47.681783",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 08_43",
+    "severite": "WARNING",
+    "confiance": 0.6666666666666666,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Alerte modérée — investigation à planifier"
+  },
+  {
+    "timestamp": "2026-07-28T23:55:27.421958",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 08_43",
+    "severite": "WARNING",
+    "confiance": 0.6666666666666666,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Alerte modérée — investigation à planifier"
+  },
+  {
+    "timestamp": "2026-07-28T23:55:27.940741",
+    "systeme": "online_boutique",
+    "fenetre": "2022-08-22 03_53",
+    "severite": "LOW",
+    "confiance": 0.3333333333333333,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": false
+    },
+    "services_suspects": [],
+    "action": "Signal faible — vérifier la modalité concernée"
+  },
+  {
+    "timestamp": "2026-07-29T00:37:16.714482",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 08_43",
+    "severite": "WARNING",
+    "confiance": 0.6666666666666666,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Alerte modérée — investigation à planifier"
+  },
+  {
+    "timestamp": "2026-07-29T00:37:17.355352",
+    "systeme": "online_boutique",
+    "fenetre": "2022-08-22 03_53",
+    "severite": "LOW",
+    "confiance": 0.3333333333333333,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": false
+    },
+    "services_suspects": [],
+    "action": "Signal faible — vérifier la modalité concernée"
+  }
+]
