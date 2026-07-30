@@ -348,5 +348,89 @@
     },
     "services_suspects": [],
     "action": "Signal faible — vérifier la modalité concernée"
+  },
+  {
+    "timestamp": "2026-07-30T19:23:41.483387",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 08_43",
+    "severite": "WARNING",
+    "confiance": 0.6666666666666666,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Alerte modérée — investigation à planifier"
+  },
+  {
+    "timestamp": "2026-07-30T19:23:42.184330",
+    "systeme": "online_boutique",
+    "fenetre": "2022-08-22 03_53",
+    "severite": "LOW",
+    "confiance": 0.3333333333333333,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": false
+    },
+    "services_suspects": [],
+    "action": "Signal faible — vérifier la modalité concernée"
+  },
+  {
+    "timestamp": "2026-07-30T19:25:03.213639",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 08_43",
+    "severite": "WARNING",
+    "confiance": 0.6666666666666666,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Alerte modérée — investigation à planifier"
+  },
+  {
+    "timestamp": "2026-07-30T19:25:03.786124",
+    "systeme": "online_boutique",
+    "fenetre": "2022-08-22 03_53",
+    "severite": "LOW",
+    "confiance": 0.3333333333333333,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": false
+    },
+    "services_suspects": [],
+    "action": "Signal faible — vérifier la modalité concernée"
+  },
+  {
+    "timestamp": "2026-07-30T19:26:57.098998",
+    "systeme": "train_ticket",
+    "fenetre": "2023-01-29 08_43",
+    "severite": "WARNING",
+    "confiance": 0.6666666666666666,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": true
+    },
+    "services_suspects": [],
+    "action": "Alerte modérée — investigation à planifier"
+  },
+  {
+    "timestamp": "2026-07-30T19:26:57.688971",
+    "systeme": "online_boutique",
+    "fenetre": "2022-08-22 03_53",
+    "severite": "LOW",
+    "confiance": 0.3333333333333333,
+    "modalites": {
+      "metriques": true,
+      "logs": false,
+      "traces": false
+    },
+    "services_suspects": [],
+    "action": "Signal faible — vérifier la modalité concernée"
   }
 ]

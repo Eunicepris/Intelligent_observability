@@ -16,7 +16,7 @@ from pipeline.detection import (
     obtenir_action,
 )
 from pipeline.alertes import SystemeAlertes
-
+from pipeline.classification_type import ClassificateurTypePanne
 
 class PipelineComplet:
     """
@@ -46,6 +46,7 @@ class PipelineComplet:
         self.ingestion = IngestionEngine(self.config['data']['base_path'])
         self.detecteur = DetecteurAnomalies(systeme=systeme)
         self.alertes   = SystemeAlertes()
+        self.classificateur = ClassificateurTypePanne()
         self.strategie = self.config['fusion']['strategie']
     
     def traiter_fenetre(self, date, window):
@@ -80,8 +81,13 @@ class PipelineComplet:
         severite  = classifier(detections)
         confiance = score_confiance(detections)
         action    = obtenir_action(severite)
-        
-        # 5. Construire le résultat
+
+        # 5. Classification du type de panne (si anomalie)
+        type_panne = None
+        if est_anomalie:
+            type_panne = self.classificateur.predire(donnees, self.detecteur, self.systeme)
+
+        # 6. Construire le résultat
         resultat = {
             'systeme'  : self.systeme,
             'fenetre'  : f"{date} {window}",
@@ -93,6 +99,7 @@ class PipelineComplet:
                 'logs'     : bool(detections['logs']),
                 'traces'   : bool(detections['traces']),
             },
+            'type_panne': type_panne,  
             'action'   : action,
         }
         
@@ -134,7 +141,14 @@ def afficher_resultat(resultat):
     for mod, det in resultat['modalites'].items():
         marker = '✓' if det else '○'
         print(f"    {marker} {mod:<12} : {'Détecte' if det else 'Normal'}")
-    
+
+    # Type de panne (NOUVEAU)
+    if resultat.get('type_panne'):
+        tp = resultat['type_panne']
+        print(f"\n  🔍 Type de panne prédit : {tp['type_predit']}")
+        print(f"  Confiance classification : {tp['confiance']*100:.0f}%")
+        print(f"  Action spécifique : {tp['action_specifique']}")
+        
     # Action
     print(f"\n  Action : {resultat['action']}")
 
