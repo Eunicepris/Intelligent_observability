@@ -203,6 +203,6 @@ Cette étude complète les résultats des notebooks précédents en apportant un
 
 ---
 
-*Rapport fait dans le cadre du projet de maîtrise en génie logiciel*
+*Rapport écrit dans le cadre du projet de maîtrise en génie logiciel*
 *Détection d'anomalies dans les systèmes microservices*
 *Dataset : Nezha (Yu et al., FSE 2023)*

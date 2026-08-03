@@ -312,6 +312,6 @@ Cette approche répond à l'objectif du projet : concevoir un système de détec
 
 ---
 
-*Rapport généré dans le cadre du projet de maîtrise en génie logiciel*
+*Rapport écrit dans le cadre du projet de maîtrise en génie logiciel*
 *Détection d'anomalies dans les systèmes microservices*
 *Dataset : Nezha (Yu et al., FSE 2023)*

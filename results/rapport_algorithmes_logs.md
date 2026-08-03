@@ -307,5 +307,5 @@ La principale limitation est la taille de la baseline normale (2 fenêtres). Ave
 
 ---
 
-*Rapport dans le cadre du projet de maîtrise en génie logiciel*
+*Rapport écrit dans le cadre du projet de maîtrise en génie logiciel*
 *Dataset : Nezha (Yu et al., FSE 2023) — github.com/IntelligentDDS/Nezha*

@@ -1,14 +1,14 @@
 algorithme,systeme,seuil,VP,FP,FN,precision,rappel,f1,donnees
 Z-score,Train Ticket,3.0,129,0,6,1.0,0.9556,0.9773,metriques
 Isolation Forest,Train Ticket,contamination=0.10,134,0,1,1.0,0.9926,0.9963,metriques
-Autoencoder,Train Ticket,percentile_80,43,0,92,1.0,0.3185,0.4831,metriques
-Random Forest,Train Ticket,class_weight=balanced,134,0,1,1.0,0.9926,0.9963,metriques
+Autoencoder,Train Ticket,percentile_80,21,0,114,1.0,0.1556,0.2692,metriques
 Autoencoder V2,Train Ticket,par_fenetre_P50,135,1,0,0.9926,1.0,0.9963,metriques
-Comptage templates,Train Ticket,templates nouveaux,34,0,101,1.0,0.252,0.402,logs
 TF-IDF,Train Ticket,similarité<0.95,132,0,3,1.0,0.9778,0.9888,logs
 Random Forest,Train Ticket,class_weight=balanced,135,0,0,1.0,1.0,1.0,logs
-LSTM DeepLog,Train Ticket,taux_anomalie>0.03,130,0,5,1.0,0.963,0.981,logs
-SVM,Train Ticket,"kernel=rbf, balanced",133,0,2,1.0,0.985,0.993,logs
+LSTM DeepLog,Train Ticket,taux_anomalie>0.03,129,0,6,1.0,0.9556,0.9773,logs
+Random Forest,Train Ticket,class_weight=balanced,134,0,1,1.0,0.9926,0.9963,metriques
+SVM,Train Ticket,"kernel=rbf, balanced",133,0,2,1.0,0.9852,0.9925,logs
+Comptage templates,Train Ticket,templates nouveaux,34,0,101,1.0,0.252,0.402,logs
 Seuil latence,Train Ticket,duree_max>mean+3std,104,0,31,1.0,0.77,0.87,traces
 Z-score,Train Ticket,3.0,133,0,2,1.0,0.985,0.993,traces
 Isolation Forest,Train Ticket,contamination=0.3,40,1,95,0.976,0.296,0.455,traces
@@ -17,11 +17,6 @@ Autoencoder,Train Ticket,percentile_50,135,1,0,0.993,1.0,0.996,traces
 DBSCAN,Train Ticket,"eps=0.5, min=5",104,1,31,0.99,0.77,0.867,traces
 Random Forest,Train Ticket,class_weight=balanced,135,0,0,1.0,1.0,1.0,traces
 LSTM,Train Ticket,taux_anomalie>0.01,55,0,80,1.0,0.407,0.579,traces
-Z-score,Online Boutique,3.0,146,0,22,1.0,0.869,0.93,traces
-Random Forest,Online Boutique,class_weight=balanced,168,0,0,1.0,1.0,1.0,traces
-Autoencoder V2,Online Boutique,par_fenetre_P50,167,1,1,0.994,0.994,0.994,traces
-SVM,Online Boutique,"kernel=rbf, balanced",45,0,123,1.0,0.268,0.423,traces
-IF par service,Online Boutique,"contamination=0.10, seuil=0.12",166,0,2,1.0,0.988,0.994,traces
 Z-score,Online Boutique,3.0,96,0,72,1.0,0.5714,0.7273,metriques
 Isolation Forest,Online Boutique,contamination=0.10,132,0,36,1.0,0.7857,0.88,metriques
 Random Forest,Online Boutique,class_weight=balanced,117,0,51,1.0,0.6964,0.8211,metriques
@@ -31,6 +26,11 @@ TF-IDF,Online Boutique,similarité<0.7,147,0,21,1.0,0.875,0.9333,logs
 Random Forest,Online Boutique,class_weight=balanced,168,0,0,1.0,1.0,1.0,logs
 SVM,Online Boutique,"kernel=rbf, balanced",44,0,124,1.0,0.2619,0.4151,logs
 LSTM DeepLog,Online Boutique,"top_K=5, taux>0.01",0,0,168,0.0,0.0,0.0,logs
+Z-score,Online Boutique,3.0,146,0,22,1.0,0.869,0.93,traces
+Random Forest,Online Boutique,class_weight=balanced,168,0,0,1.0,1.0,1.0,traces
+Autoencoder V2,Online Boutique,par_fenetre_P50,167,1,1,0.994,0.994,0.994,traces
+SVM,Online Boutique,"kernel=rbf, balanced",45,0,123,1.0,0.268,0.423,traces
+IF par service,Online Boutique,"contamination=0.10, seuil=0.12",166,0,2,1.0,0.988,0.994,traces
 LOF,Train Ticket,"n_neighbors=20, contamination=0.05",124,0,11,1.0,0.9185,0.9575,metriques
 LOF,Online Boutique,"n_neighbors=20, contamination=0.05",107,0,61,1.0,0.6369,0.7782,metriques
 XGBoost,Train Ticket,scale_pos_weight=balanced,133,0,2,1.0,0.9852,0.9925,metriques
