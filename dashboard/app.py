@@ -6,6 +6,7 @@ Interface visuelle qui permet de :
 - Consulter l'historique des alertes
 - Voir les statistiques globales
 """
+import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -17,7 +18,8 @@ from pathlib import Path
 # CONFIGURATION
 
 
-API_URL = "http://localhost:8000"
+
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 st.set_page_config(
     page_title="Détection d'anomalies",
@@ -90,9 +92,9 @@ tab_detection, tab_alertes, tab_stats = st.tabs([
 ])
 
 
-# ───────────────────────────────────────
+# 
 # ONGLET 1 : DÉTECTION
-# ───────────────────────────────────────
+# 
 with tab_detection:
     st.header("Analyse d'une fenêtre")
     
@@ -170,7 +172,41 @@ with tab_detection:
                     )
                     fig.update_layout(showlegend=False, height=300)
                     st.plotly_chart(fig, use_container_width=True)
-                    
+
+
+                    # ─── Type de panne prédit ───
+                    if res.get('type_panne'):
+                        tp = res['type_panne']
+                        st.markdown("### 🔍 Type de panne prédit")
+                        
+                        col_tp1, col_tp2 = st.columns(2)
+                        with col_tp1:
+                            st.metric("Type de panne", tp['type_predit'].upper())
+                        with col_tp2:
+                            st.metric("Confiance classification", f"{tp['confiance']*100:.0f}%")
+                        
+                        # Action spécifique
+                        st.info(f"**Action spécifique** : {tp['action_specifique']}")
+                        
+                        # Graphique probabilités
+                        df_probs = pd.DataFrame([
+                            {"Type": k, "Probabilité (%)": v * 100}
+                            for k, v in tp['probabilites'].items()
+                        ]).sort_values("Probabilité (%)", ascending=True)
+                        
+                        fig_probs = px.bar(
+                            df_probs,
+                            x="Probabilité (%)",
+                            y="Type",
+                            orientation='h',
+                            color="Probabilité (%)",
+                            color_continuous_scale='Blues',
+                            title="Probabilités par type de panne",
+                        )
+                        fig_probs.update_layout(showlegend=False, height=350)
+                        st.plotly_chart(fig_probs, use_container_width=True)
+
+                        
                     # Action recommandée
                     st.markdown("### 🎬 Action recommandée")
                     if sev == 'CRITICAL':
@@ -190,9 +226,9 @@ with tab_detection:
                 st.error(f"Erreur de connexion : {str(e)}")
 
 
-# ───────────────────────────────────────
+# 
 # ONGLET 2 : ALERTES
-# ───────────────────────────────────────
+# 
 with tab_alertes:
     st.header("Historique des alertes")
     
@@ -256,9 +292,9 @@ with tab_alertes:
         st.error(f"Erreur : {str(e)}")
 
 
-# ───────────────────────────────────────
+# 
 # ONGLET 3 : STATISTIQUES
-# ───────────────────────────────────────
+# 
 with tab_stats:
     st.header("Statistiques globales")
     

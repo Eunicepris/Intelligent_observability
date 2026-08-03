@@ -1,0 +1,35 @@
+# Environnements Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Données volumineuses (montées comme volumes)
+data/nezha/
+data/normal/
+data/anomalies/
+
+# Notebooks (pas nécessaires dans le conteneur)
+notebooks/
+.ipynb_checkpoints/
+
+# Résultats et rapports (générés localement)
+results/
+figures/
+output/
+
+# Git et éditeurs
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Fichiers temporaires
+*.log
+alertes.json
+.DS_Store
+
+# Modèles (montés comme volume aussi)
+# models/  ← on GARDE dans l'image pour que le pipeline fonctionne

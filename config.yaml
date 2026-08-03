@@ -1,6 +1,5 @@
 data:
-  base_path: /home/eunice/Bureau/Train_ticket/Intelligent_observability/data
-
+  base_path: data
 systemes:
   train_ticket:
     dates: [2023-01-29, 2023-01-30]

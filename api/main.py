@@ -15,6 +15,7 @@ from typing import List, Optional, Dict
 
 from pipeline.main import PipelineComplet
 from pipeline.alertes import SystemeAlertes
+from typing import List, Optional, Dict
 
 
 
@@ -54,6 +55,7 @@ class ResultatDetection(BaseModel):
     severite : str
     confiance: float
     modalites: Modalites
+    type_panne: Optional[Dict] = None 
     action   : str
 
 
