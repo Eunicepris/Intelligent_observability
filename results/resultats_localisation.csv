@@ -1,0 +1,6 @@
+approche,systeme,top1,top3,top5,mrr,top1_cpu_contention,top1_exception,top1_network_delay,top1_return
+Métriques (LOF),Train Ticket,8.1,10.4,11.9,0.132,42.9,5.1,0.0,0.0
+Logs (TF-IDF),Train Ticket,0.0,0.0,0.7,0.066,0.0,0.0,0.0,0.0
+Traces (IF par service),Train Ticket,11.9,23.0,28.9,0.234,47.6,0.0,7.1,9.1
+Fusion RRF (3 modalités),Train Ticket,5.9,14.1,20.7,0.167,38.1,0.0,0.0,0.0
+Fusion pondérée (traces+métriques),Train Ticket,5.9,16.3,25.2,0.176,0.0,0.0,0.0,0.0

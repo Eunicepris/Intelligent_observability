@@ -193,22 +193,157 @@ Malgré le faible F1, l'erreur de reconstruction est 55x plus élevée pendant l
 
 ---
 
+
+## 5. Algorithme 4 — Random Forest (supervisé)
+
+### Principe
+
+Le Random Forest est un algorithme de classification supervisé
+qui construit 100 arbres de décision différents et combine leurs votes
+pour classer chaque point comme normal ou anormal.
+
+Contrairement aux trois algorithmes précédents qui apprennent
+uniquement sur les données normales, le Random Forest utilise
+les labels du ground truth — il voit des exemples de normal
+ET d'anormal pendant l'entraînement.
+
+### Configuration
+
+- **Nombre d'arbres** : 100
+- **Profondeur maximale** : 10
+- **Pondération des classes** : `balanced` (compense le déséquilibre)
+- **Split train/test** : 70% / 30% avec stratification
+
+### Gestion du déséquilibre
+
+Le dataset contient 76 225 points normaux contre 135 anormaux (0.18%).
+Sans correction, le modèle prédirait systématiquement "normal".
+Le paramètre `class_weight='balanced'` attribue un poids de 565x
+aux anomalies, garantissant qu'elles pèsent autant que les normaux
+dans le vote des arbres.
+
+### Résultats
+
+| Métrique | Valeur |
+|----------|--------|
+| Vrais positifs (VP) | 134 |
+| Faux positifs (FP) | 0 |
+| Faux négatifs (FN) | 1 |
+| **Précision** | **100.0%** |
+| **Rappel** | **99.3%** |
+| **F1-score** | **99.6%** |
+
+### Feature Importance
+
+Le Random Forest fournit un classement des métriques
+les plus discriminantes pour la détection :
+
+| Métrique | Importance | Interprétation |
+|----------|-----------|---------------|
+| NetworkReceiveBytes | 30.7% | Le trafic réseau est le signal le plus fort |
+| PodServerLatencyP99 | 30.5% | La latence est presque aussi importante |
+| NetworkTransmitBytes | 16.2% | Signal secondaire réseau |
+| MemoryUsageRate | 13.2% | Signal modéré |
+| CpuUsageRate | 9.5% | Le CPU est le moins discriminant |
+
+Observation : contrairement à l'intuition, le CPU n'est pas
+la métrique la plus importante. Le réseau et la latence sont
+les signaux les plus discriminants, suggérant que les pannes
+impactent d'abord la communication entre services
+avant les ressources locales.
+
+### Analyse
+
+Le Random Forest obtient le meilleur F1 (99.6%) grâce à son accès
+aux labels. Cependant, ce résultat doit être nuancé :
+le modèle est entraîné et évalué sur les mêmes données
+(prédiction sur tout le dataset après entraînement sur 70%).
+En production réelle, les labels ne sont pas disponibles —
+ce qui rend les algorithmes non supervisés (Z-score, Isolation Forest)
+plus réalistes pour un déploiement.
+
+
+## 6. Comparaison synthétique
+
+| Algorithme | Type | Précision | Rappel | F1-score | VP | FP | FN |
+|------------|------|-----------|--------|----------|----|----|----|
+| **Random Forest** | Supervisé | 100% | **99.3%** | **99.6%** | **134** | 0 | 1 |
+| **Z-score** | Non supervisé | 100% | 95.6% | 97.7% | 129 | 0 | 6 |
+| **Isolation Forest** | Non supervisé | 100% | 91.1% | 95.3% | 123 | 0 | 12 |
+| **Autoencoder** | Non supervisé | 100% | 14.1% | 24.7% | 19 | 0 | 116 |
+
+### Observations clés
+
+1. **Précision identique (100%)** — aucun algorithme ne génère
+   de fausse alarme sur ce dataset.
+
+2. **Random Forest domine** — F1 de 99.6% grâce à l'accès aux labels.
+   Cependant, en production les labels ne sont pas disponibles.
+
+3. **Z-score — meilleur non supervisé** — F1 de 97.7% malgré
+   sa simplicité. Les signaux d'anomalie dans les métriques
+   de Train Ticket sont suffisamment nets pour un seuil statistique.
+
+4. **Le réseau et la latence sont plus discriminants que le CPU** —
+   le feature importance du Random Forest révèle que
+   NetworkReceiveBytes (30.7%) et PodServerLatencyP99 (30.5%)
+   sont les variables les plus importantes.
+
+5. **L'Autoencoder est limité par le dataset** — F1 de 24.7%.
+   Les fichiers métriques identiques entre construct_data et rca_data
+   empêchent l'Autoencoder d'apprendre un normal pur.
+
+6. **Supervisé vs non supervisé** — en contexte académique,
+   Random Forest donne les meilleurs résultats.
+   En contexte de production, Z-score est recommandé
+   car il ne nécessite pas de labels.
+
+
 ## 7. Conclusion et perspectives
 
 ### Conclusion
 
-Le Z-score est l'algorithme le plus performant sur les métriques de Train Ticket avec un F1 de 97.7%. Sa simplicité, son interprétabilité et sa granularité par service en font l'approche de référence pour ce type de données.
+Le Random Forest obtient le meilleur F1 (99.6%) grâce à son accès
+aux labels du ground truth. Cependant, en contexte de production réelle
+où les labels ne sont pas disponibles, le Z-score (F1 = 97.7%)
+est l'algorithme non supervisé le plus performant.
+Sa simplicité, son interprétabilité et sa granularité par service
+en font l'approche de référence pour un déploiement en production.
 
-Les pannes de type `exception` et `return` restent non détectables par les métriques — elles requièrent une analyse des logs applicatifs. Cela justifie l'approche multi-modale (logs + métriques + traces) pour une couverture complète des 4 types de pannes.
+L'Isolation Forest (F1 = 95.3%) confirme que les approches
+non supervisées multi-dimensionnelles sont compétitives,
+tandis que l'Autoencoder (F1 = 24.7%) est limité par la structure
+du dataset Nezha (fichiers métriques identiques entre construct_data
+et rca_data).
+
+Le feature importance du Random Forest révèle que le trafic réseau
+(30.7%) et la latence P99 (30.5%) sont plus discriminants
+que le CPU (9.5%) — une observation contre-intuitive mais importante
+pour le choix des métriques à surveiller en production.
+
+Les pannes de type `exception` et `return` restent non détectables
+par les métriques seules — elles requièrent une analyse
+des logs applicatifs. Cela justifie l'approche multi-modale
+(logs + métriques + traces) pour une couverture complète
+des 4 types de pannes.
 
 ### Perspectives
 
-1. **Détection sur les logs** — algorithmes DeepLog, LogBERT pour les pannes `exception` et `return`
-2. **Détection sur les traces** — analyse des durées de spans pour les pannes `network_delay`
-3. **Fusion multi-modale** — combiner les scores des 3 modalités pour améliorer le rappel global
-4. **Optimisation des hyperparamètres** — ajuster `contamination` pour l'Isolation Forest et le seuil pour l'Autoencoder via validation croisée
+1. **Détection sur les logs** — algorithmes TF-IDF, DeepLog
+   pour les pannes `exception` et `return`
+2. **Détection sur les traces** — analyse des durées de spans
+   pour les pannes `network_delay`
+3. **Fusion multi-modale** — combiner les scores des 3 modalités
+   pour améliorer le rappel global
+4. **Optimisation des hyperparamètres** — ajuster `contamination`
+   pour l'Isolation Forest et le seuil pour l'Autoencoder
+   via validation croisée
+5. **Validation sur Online Boutique** — appliquer les mêmes
+   algorithmes sur le deuxième système pour vérifier
+   la généralisation des résultats
 
 ---
 
-*Rapport fait dans le cadre du projet de maîtrise en génie logiciel — Détection d'anomalies dans les systèmes microservices*  
+*Rapport écrit dans le cadre du projet de maîtrise en génie logiciel*
+*Détection d'anomalies dans les systèmes microservices*
 *Dataset : Nezha (Yu et al., FSE 2023) — github.com/IntelligentDDS/Nezha*
