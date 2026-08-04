@@ -130,8 +130,10 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
-            type=sha,prefix={{branch}}-
+            type=sha,format=short
             type=raw,value=latest,enable={{is_default_branch}}
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest
       
       - name: Build and Push
         uses: docker/build-push-action@v5
