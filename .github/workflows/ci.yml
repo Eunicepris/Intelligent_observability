@@ -12,15 +12,43 @@ env:
 
 jobs:
   # ═══════════════════════════════════════════
-  # JOB 1 : Tests unitaires
+  # JOB 1 : Vérification qualité du code
   # ═══════════════════════════════════════════
-  test:
+  lint:
+    name: Lint code Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Installer les outils de lint
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+      
+      - name: Vérifier la syntaxe critique
+        run: |
+          # Erreurs de syntaxe et noms non définis
+          flake8 pipeline/ api/ dashboard/ --count --select=E9,F63,F7,F82 --show-source --statistics
+      
+      - name: Vérifier la qualité (warnings)
+        run: |
+          # Complexité et style (non bloquant)
+          flake8 pipeline/ api/ dashboard/ --count --exit-zero --max-complexity=15 --max-line-length=120 --statistics
+
+  # ═══════════════════════════════════════════
+  # JOB 2 : Tests unitaires
+  # ═══════════════════════════════════════════
+  test-unit:
     name: Tests unitaires
     runs-on: ubuntu-latest
-    
+    needs: lint
     steps:
-      - name: Checkout du code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
       - name: Setup Python 3.12
         uses: actions/setup-python@v5
@@ -32,36 +60,115 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov
+          pip install pytest pytest-cov httpx
       
       - name: Lancer les tests unitaires
-        run: pytest tests/ -v --cov=pipeline
+        run: pytest tests/test_pipeline.py -v --cov=pipeline
       
       - name: Vérifier la syntaxe Python
         run: python -m py_compile pipeline/*.py api/*.py dashboard/*.py
 
   # ═══════════════════════════════════════════
-  # JOB 2 : Build Docker Image
+  # JOB 3 : Tests d'intégration (détection + classification)
   # ═══════════════════════════════════════════
-  build:
-    name: Build Docker Image
+  test-integration:
+    name: Tests intégration (détection + classification)
     runs-on: ubuntu-latest
-    needs: test
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      
+      - name: Installer les dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+      
+      - name: Vérifier le mini-dataset
+        run: |
+          ls -la tests/mini_data/anomalies/2023-01-29/
+          du -sh tests/mini_data/
+      
+      - name: Lancer les tests d'intégration
+        run: pytest tests/test_integration.py -v
+
+  # ═══════════════════════════════════════════
+  # JOB 4 : Build et Push Docker
+  # ═══════════════════════════════════════════
+  build-and-push:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: [test-unit, test-integration]
+    
+    permissions:
+      contents: read
+      packages: write
     
     steps:
-      - name: Checkout du code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
       
-      - name: Build l'image Docker
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Build and Push
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: false
-          tags: |
-            anomalie-detection:${{ github.sha }}
-            anomalie-detection:latest
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # ═══════════════════════════════════════════
+  # JOB 5 : Simulation de déploiement
+  # ═══════════════════════════════════════════
+  deploy:
+    name: Déploiement (simulation)
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Simuler le déploiement
+        run: |
+          echo "═══════════════════════════════════════"
+          echo "  DÉPLOIEMENT DE LA PLATEFORME"
+          echo "═══════════════════════════════════════"
+          echo ""
+          echo "✓ Image Docker : ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          echo "✓ Branche      : ${{ github.ref_name }}"
+          echo "✓ Commit       : ${{ github.sha }}"
+          echo ""
+          echo "Simulation du déploiement en cours..."
+          sleep 3
+          echo "✓ Container API démarré sur port 8000"
+          echo "✓ Container Dashboard démarré sur port 8501"
+          echo "✓ Healthchecks OK"
+          echo ""
+          echo "═══════════════════════════════════════"
+          echo "  DÉPLOIEMENT RÉUSSI"
+          echo "═══════════════════════════════════════"
