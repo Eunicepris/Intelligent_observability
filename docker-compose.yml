@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # 
+  # API FastAPI
+  # 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: anomalie-detection:1.0.0
+    container_name: anomalie-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Monter les données en lecture seule
+      - ./data:/app/data:ro
+      - ./config.yaml:/app/config.yaml:ro 
+      # Partager les alertes entre conteneurs
+      - alertes-data:/app/alertes
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - anomalie-network
+
+  # 
+  # Dashboard Streamlit
+  # 
+  dashboard:
+    image: anomalie-detection:1.0.0
+    container_name: anomalie-dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data:ro
+      - ./config.yaml:/app/config.yaml:ro
+      - alertes-data:/app/alertes
+      - ./dashboard/app.py:/app/dashboard/app.py:ro 
+
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_URL=http://api:8000
+    command: streamlit run dashboard/app.py --server.address=0.0.0.0 --server.port=8501
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - anomalie-network
+
+# 
+# VOLUMES PERSISTANTS
+# 
+volumes:
+  alertes-data:
+    driver: local
+
+# 
+# RÉSEAU INTERNE
+# 
+networks:
+  anomalie-network:
+    driver: bridge

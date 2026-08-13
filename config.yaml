@@ -1,0 +1,25 @@
+data:
+  base_path: data
+systemes:
+  train_ticket:
+    dates: [2023-01-29, 2023-01-30]
+  online_boutique:
+    dates: [2022-08-22, 2022-08-23]
+
+detection:
+  metriques:
+    n_neighbors: 20
+    contamination: 0.05
+  logs:
+    max_features: 500
+    seuil_tt: 0.95
+    seuil_ob: 0.7
+  traces:
+    contamination: 0.10
+    seuil_taux: 0.12
+
+fusion:
+  strategie: or
+
+api:
+  port: 8000
