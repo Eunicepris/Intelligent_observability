@@ -22,3 +22,9 @@ models/autoencoder.keras
 models/isolation_forest.pkl
 models/scaler_ae.pkl
 models/scalers_if.pkl
+
+# Alertes générées par les tests
+alertes.json
+
+# PDF exports (garder seulement les .md)
+*.md.pdf

@@ -16,9 +16,9 @@ from pipeline.detection import (
 )
 
 
-# ═══════════════════════════════════════════
+# 
 # TESTS DE FUSION
-# ═══════════════════════════════════════════
+# 
 
 class TestFusion:
     """Tests des stratégies de fusion multi-modale."""
@@ -52,14 +52,15 @@ class TestFusion:
         assert fusionner(detections, 'and') == False
     
     def test_strategie_invalide(self):
+        from pipeline.exceptions import DataError
         detections = {'metriques': True, 'logs': False, 'traces': False}
-        with pytest.raises(ValueError):
+        with pytest.raises(DataError):
             fusionner(detections, 'strategie_inconnue')
 
 
-# ═══════════════════════════════════════════
+# 
 # TESTS DE CLASSIFICATION
-# ═══════════════════════════════════════════
+# 
 
 class TestClassification:
     """Tests de la classification en 4 niveaux."""
@@ -81,9 +82,9 @@ class TestClassification:
         assert classifier(detections) == 'NORMAL'
 
 
-# ═══════════════════════════════════════════
+# 
 # TESTS DE SCORE DE CONFIANCE
-# ═══════════════════════════════════════════
+# 
 
 class TestScoreConfiance:
     """Tests du calcul de confiance."""
@@ -105,9 +106,9 @@ class TestScoreConfiance:
         assert score_confiance(detections) == 0.0
 
 
-# ═══════════════════════════════════════════
+# 
 # TESTS DES ACTIONS
-# ═══════════════════════════════════════════
+# 
 
 class TestActions:
     """Tests des actions recommandées."""
@@ -129,9 +130,9 @@ class TestActions:
         assert 'passive' in action.lower() or 'aucune' in action.lower()
 
 
-# ═══════════════════════════════════════════
+# 
 # TESTS DES ALERTES
-# ═══════════════════════════════════════════
+# 
 
 class TestAlertes:
     """Tests du système d'alertes."""
