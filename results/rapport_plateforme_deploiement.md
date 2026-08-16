@@ -31,6 +31,9 @@ En une seule commande (`docker-compose up`), un utilisateur peut lancer toute la
 
 ### 2.2 Architecture générale
 
+L'architecture est organisée en 4 couches distinctes, chacune ayant une 
+responsabilité claire.
+
 L┌─────────────────────────────────────────────────────────────────────┐
 │                          COUCHE PRÉSENTATION                        │
 │                                                                     │
@@ -103,33 +106,31 @@ L┌─────────────────────────�
 
 L'idée était de bien séparer les préoccupations : le dashboard ne fait que de l'affichage, l'API expose la logique métier via HTTP, et le pipeline gère toute l'analyse. Comme ça, on peut modifier une partie sans toucher aux autres — par exemple, si demain on veut remplacer le dashboard Streamlit par une interface React, on n'a rien à changer dans le pipeline ni dans l'API.
 
-Explication de ce nouveau diagramme
+### Rôle de chaque couche
 
-Il montre 4 couches empilées :
+**Couche présentation** : c'est ce que voit l'utilisateur — un dashboard 
+web accessible via le navigateur. Elle ne fait aucun calcul et se contente 
+d'afficher les résultats fournis par l'API.
 
-Couche 1 — Présentation (en haut)
+**Couche interface** : l'API REST expose les fonctionnalités du pipeline 
+via HTTP. Elle joue le rôle de point d'entrée programmatique et gère la 
+validation des requêtes, la sérialisation JSON, et la traduction des 
+erreurs en codes HTTP appropriés.
 
-Ce que voit l'utilisateur : le dashboard Streamlit sur le port 8501.
+**Couche métier** : le cœur du système. Le pipeline (via le pattern Facade) 
+orchestre 4 modules spécialisés : Ingestion (chargement des données), 
+Détection (les 3 algorithmes ML), Classification du type de panne 
+(Random Forest supervisé), et Alertes (persistance).
 
-Couche 2 — Interface
+**Couche données** : les ressources persistantes du système. Elle contient 
+les données brutes de Nezha, les modèles ML pré-entraînés, et le fichier 
+JSON qui accumule les alertes.
 
-L'API FastAPI sur le port 8000, avec ses endpoints principaux exposés.
-
-Couche 3 — Métier
-
-Le pipeline complet qui orchestre 4 modules :
-
-Ingestion : charge les données
-Détection : applique les 3 algorithmes (LOF, TF-IDF, IF)
-Classificateur Type : Random Forest pour le type de panne
-Alertes : gère la persistance
-Couche 4 — Données (en bas)
-
-Les 3 sources persistantes :
-
-Données Nezha : les CSV du dataset (métriques, logs, traces)
-Modèles ML : les fichiers .pkl pré-entraînés
-Alertes : le fichier JSON qui accumule les alertes
+Cette séparation permet à chaque couche d'évoluer indépendamment. Par 
+exemple, si demain on veut remplacer le dashboard Streamlit par une 
+interface React, on n'a rien à changer dans l'API ni dans le pipeline. 
+De même, l'API pourrait être appelée par un autre système (script 
+d'automatisation, outil de monitoring externe) sans passer par le dashboard.
 ---
 
 ## 3. Le pipeline Python
