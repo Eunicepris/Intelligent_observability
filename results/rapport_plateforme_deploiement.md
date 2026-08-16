@@ -31,19 +31,105 @@ En une seule commande (`docker-compose up`), un utilisateur peut lancer toute la
 
 ### 2.2 Architecture générale
 
-Le tout suit une architecture en couches assez classique :
-
-```
-Utilisateur ──▶ Dashboard (Streamlit) ──▶ API (FastAPI) ──▶ Pipeline (Python)
-                                                                    │
-                                                            ┌───────┴───────┐
-                                                            ▼               ▼
-                                                       Modèles ML       Données
-                                                        (.pkl)          (Nezha)
+L┌─────────────────────────────────────────────────────────────────────┐
+│                          COUCHE PRÉSENTATION                        │
+│                                                                     │
+│                      Utilisateur (SRE / DevOps)                     │
+│                              │                                      │
+│                              ▼                                      │
+│                    ┌──────────────────┐                             │
+│                    │    DASHBOARD     │                             │
+│                    │   (Streamlit)    │                             │
+│                    │   Port 8501      │                             │
+│                    └────────┬─────────┘                             │
+└─────────────────────────────┼───────────────────────────────────────┘
+                              │
+                              │  Requêtes HTTP / JSON
+                              │  (POST /api/detecter)
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                          COUCHE INTERFACE                           │
+│                                                                     │
+│                    ┌──────────────────┐                             │
+│                    │      API REST    │                             │
+│                    │    (FastAPI)     │                             │
+│                    │   Port 8000      │                             │
+│                    │                  │                             │
+│                    │  Endpoints :     │                             │
+│                    │  • /api/detecter │                             │
+│                    │  • /api/alertes  │                             │
+│                    │  • /api/health   │                             │
+│                    └────────┬─────────┘                             │
+└─────────────────────────────┼───────────────────────────────────────┘
+                              │
+                              │  Appels Python
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                          COUCHE MÉTIER                              │
+│                                                                     │
+│              ┌───────────────────────────────┐                      │
+│              │       PIPELINE COMPLET        │                      │
+│              │      (pipeline/main.py)       │                      │
+│              │        (Pattern Facade)       │                      │
+│              └───┬───────┬───────┬───────┬───┘                      │
+│                  │       │       │       │                          │
+│                  ▼       ▼       ▼       ▼                          │
+│              ┌─────┐ ┌─────┐ ┌──────┐ ┌────────┐                    │
+│              │ Ing │ │ Dét │ │Class │ │Alertes │                    │
+│              │ ges │ │ ect │ │if.   │ │        │                    │
+│              │ tion│ │ ion │ │Type  │ │        │                    │
+│              └──┬──┘ └──┬──┘ └───┬──┘ └───┬────┘                    │
+└─────────────────┼───────┼────────┼────────┼─────────────────────────┘
+                  │       │        │        │
+                  ▼       ▼        ▼        ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        COUCHE DONNÉES                               │
+│                                                                     │
+│    ┌─────────────┐   ┌──────────────┐   ┌───────────────┐           │
+│    │  DONNÉES    │   │  MODÈLES ML  │   │   ALERTES     │           │
+│    │  (Nezha)    │   │   (.pkl)     │   │  (JSON)       │           │
+│    │             │   │              │   │               │           │
+│    │  data/      │   │  models/     │   │  alertes.json │           │
+│    │  ├anomalies │   │  ├lof_*.pkl  │   │               │           │
+│    │  └normal    │   │  ├tfidf_*.pkl│   │               │           │
+│    │             │   │  ├if_*.pkl   │   │               │           │
+│    │             │   │  └classifier │   │               │           │
+│    │             │   │    _type.pkl │   │               │           │
+│    └─────────────┘   └──────────────┘   └───────────────┘           │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 L'idée était de bien séparer les préoccupations : le dashboard ne fait que de l'affichage, l'API expose la logique métier via HTTP, et le pipeline gère toute l'analyse. Comme ça, on peut modifier une partie sans toucher aux autres — par exemple, si demain on veut remplacer le dashboard Streamlit par une interface React, on n'a rien à changer dans le pipeline ni dans l'API.
 
+Explication de ce nouveau diagramme
+
+Il montre 4 couches empilées :
+
+Couche 1 — Présentation (en haut)
+
+Ce que voit l'utilisateur : le dashboard Streamlit sur le port 8501.
+
+Couche 2 — Interface
+
+L'API FastAPI sur le port 8000, avec ses endpoints principaux exposés.
+
+Couche 3 — Métier
+
+Le pipeline complet qui orchestre 4 modules :
+
+Ingestion : charge les données
+Détection : applique les 3 algorithmes (LOF, TF-IDF, IF)
+Classificateur Type : Random Forest pour le type de panne
+Alertes : gère la persistance
+Couche 4 — Données (en bas)
+
+Les 3 sources persistantes :
+
+Données Nezha : les CSV du dataset (métriques, logs, traces)
+Modèles ML : les fichiers .pkl pré-entraînés
+Alertes : le fichier JSON qui accumule les alertes
 ---
 
 ## 3. Le pipeline Python
