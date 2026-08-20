@@ -1,3 +1,26 @@
+> ⚠️ **Rapport historique — Pipeline core initial**
+>
+> Ce document décrit **l'état du pipeline après la construction des 4 modules initiaux** (ingestion, détection, alertes, main). Il ne reflète pas l'état actuel du projet, qui a évolué de manière significative après ce rapport.
+>
+> **Évolutions non couvertes dans ce rapport** :
+> - Ajout du module `pipeline/classification_type.py` (Random Forest supervisé, F1=63%)
+> - Ajout des modules `pipeline/exceptions.py` (hiérarchie d'exceptions) et `pipeline/logger.py` (logging centralisé)
+> - Refactoring avec **injection de dépendances** au constructeur de `PipelineComplet` (pattern Facade explicite)
+> - Middleware HTTP de logging dans l'API
+> - Gestion des codes HTTP appropriés (400/404/500)
+> - Chargement des pipelines au démarrage via `lifespan` FastAPI
+> - Champ `type_panne` dans les résultats du pipeline
+> - Actions spécifiques par type de panne
+> - Chemin de données passé de `/home/eunice/.../data` (absolu) à `data` (relatif)
+>
+> **Pour l'état actuel complet du système**, consultez :
+> - `rapport_plateforme_deploiement.md` — plateforme complète avec API, dashboard, Docker, CI/CD
+> - `rapport_classification_type_panne.md` — composante ML ajoutée
+>
+> Ce rapport est conservé à des fins de traçabilité de l'évolution du projet.
+
+---
+
 # Rapport — Construction du pipeline core
 ## Plateforme de détection d'anomalies multi-modale
 

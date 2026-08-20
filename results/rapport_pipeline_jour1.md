@@ -1,3 +1,14 @@
+> ⚠️ **Rapport historique**
+>
+> Ce document décrit **l'état du projet au premier jour de développement du pipeline**. Il est conservé à des fins de traçabilité de l'évolution du projet.
+>
+> **Pour l'état actuel du système**, consultez :
+> - `rapport_plateforme_deploiement.md` — description complète de la plateforme finale (pipeline, API, dashboard, Docker, CI/CD)
+> - `rapport_pipeline_core.md` — détails techniques du pipeline core (partiellement obsolète également)
+> - `rapport_classification_type_panne.md` — composante ML ajoutée après ce rapport
+
+---
+
 # Rapport — Construction du pipeline (Jour 1)
 ## Fondations du pipeline automatique de détection d'anomalies
 
@@ -77,6 +88,8 @@ Création du notebook `notebooks/12_sauvegarde_modeles.ipynb` qui entraîne et s
 **Total** : 43 MB de modèles pré-entraînés prêts à être chargés instantanément.
 
 **Impact** : plus besoin de réentraîner les modèles à chaque exécution — le pipeline peut démarrer en quelques secondes au lieu de plusieurs minutes.
+
+**Note (évolution ultérieure)** : un 7ème modèle a été ajouté par la suite — `classifier_type_panne.pkl` (Random Forest supervisé pour la classification du type de panne). Voir `rapport_classification_type_panne.md`.
 
 ### 2.5 Module d'ingestion (`pipeline/ingestion.py`)
 
@@ -168,7 +181,7 @@ La classification `WARNING` (2 modalités sur 3) reflète correctement la diffic
 | Module détection | ✓ testé |
 | Test end-to-end | ✓ réussi |
 
-### 4.2 Ce qui reste à faire
+### 4.2 Ce qui reste à faire (à la date de ce rapport)
 
 **Modules Python** :
 - `pipeline/alertes.py` — système d'alertes JSON
@@ -182,6 +195,13 @@ La classification `WARNING` (2 modalités sur 3) reflète correctement la diffic
 - README complet
 - Script de démonstration
 - Tests unitaires (optionnel)
+
+**Note (évolution ultérieure)** : tous ces éléments ont été réalisés après ce jour 1. Le projet a également été enrichi de :
+- Module `classification_type.py` (classification supervisée du type de panne)
+- Refactoring complet avec injection de dépendances, hiérarchie d'exceptions et logging centralisé
+- Conteneurisation Docker (Dockerfile + docker-compose)
+- Pipeline CI/CD GitHub Actions (5 jobs)
+- 27 tests automatisés (unitaires + intégration)
 
 ### 4.3 Prochaines étapes prioritaires
 
@@ -236,5 +256,5 @@ Les prochaines étapes consistent à compléter les modules restants (alertes, o
 
 ---
 
-*Rapport de progression — Construction du pipeline de détection d'anomalies*
+*Rapport de progression — Construction du pipeline de détection d'anomalies (jour 1)*
 *Projet : plateforme cloud-native d'observabilité intelligente*
