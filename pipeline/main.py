@@ -25,6 +25,9 @@ from pipeline.logger import setup_logging
 
 logger = setup_logging(__name__)
 
+# Racine du projet (calculée depuis l'emplacement de ce fichier)
+# pipeline/main.py -> PROJECT_ROOT = Intelligent_observability/
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # Sévérités qui déclenchent une alerte
 SEVERITES_ALERTABLES = {'CRITICAL', 'WARNING', 'LOW'}
@@ -48,7 +51,8 @@ class PipelineComplet:
     def __init__(
         self,
         systeme: str = 'train_ticket',
-        config_path: str = 'config.yaml',
+        #config_path: str = 'config.yaml',
+        config_path: Optional[str] = None,
         ingestion: Optional[IngestionEngine] = None,
         detecteur: Optional[DetecteurAnomalies] = None,
         alertes: Optional[SystemeAlertes] = None,
@@ -73,14 +77,31 @@ class PipelineComplet:
             DataError          : si le systeme est invalide
             ModelError         : si les modèles ne peuvent pas être chargés
         """
+        # Chemin config par défaut : racine du projet
+        if config_path is None:
+            config_path = PROJECT_ROOT / 'config.yaml'
+        
         self.systeme = systeme
         self.config = self._charger_config(config_path)
         
+        # Résoudre base_path relatif à la racine du projet
+        base_path = self.config['data']['base_path']
+        if not Path(base_path).is_absolute():
+            base_path = PROJECT_ROOT / base_path
+        
+        # Résoudre alertes_fichier de la même façon
+        alertes_fichier = self.config.get('alertes', {}).get('fichier', 'alertes.json')
+        if not Path(alertes_fichier).is_absolute():
+            alertes_fichier = PROJECT_ROOT / alertes_fichier
+        
+        # Résoudre models_dir relatif à la racine du projet
+        models_dir = PROJECT_ROOT / 'models'
+        
         # Injection de dépendances avec valeurs par défaut
-        self.ingestion = ingestion or IngestionEngine(self.config['data']['base_path'])
-        self.detecteur = detecteur or DetecteurAnomalies(systeme=systeme)
-        self.alertes = alertes or SystemeAlertes()
-        self.classificateur = classificateur or ClassificateurTypePanne()
+        self.ingestion = ingestion or IngestionEngine(str(base_path))
+        self.detecteur = detecteur or DetecteurAnomalies(systeme=systeme, models_dir=str(models_dir))
+        self.alertes = alertes or SystemeAlertes(fichier_alertes=str(alertes_fichier))
+        self.classificateur = classificateur or ClassificateurTypePanne(models_dir=str(models_dir))
         
         self.strategie = self.config['fusion']['strategie']
         
