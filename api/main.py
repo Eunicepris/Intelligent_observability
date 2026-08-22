@@ -285,7 +285,9 @@ def obtenir_alertes(
     - severite : filtrer par 'CRITICAL', 'WARNING', 'LOW' ou 'NORMAL'
     - systeme  : filtrer par 'train_ticket' ou 'online_boutique'
     """
-    alertes_engine = SystemeAlertes()
+    #alertes_engine = SystemeAlertes()
+        # Réutiliser le SystemeAlertes déjà configuré au démarrage (chemin cohérent Docker)
+    alertes_engine = pipelines['train_ticket'].alertes
     
     try:
         alertes = alertes_engine.obtenir(
@@ -309,5 +311,8 @@ def obtenir_alertes(
 @app.get("/api/statistiques", tags=["Alertes"])
 def obtenir_statistiques() -> Dict[str, Any]:
     """Retourne les statistiques globales des alertes enregistrées."""
-    alertes_engine = SystemeAlertes()
+    #alertes_engine = SystemeAlertes()
+    #return alertes_engine.statistiques()
+    # Réutiliser le SystemeAlertes déjà configuré au démarrage
+    alertes_engine = pipelines['train_ticket'].alertes
     return alertes_engine.statistiques()
