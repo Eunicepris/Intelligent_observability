@@ -1,7 +1,7 @@
 # Intelligent Observability Platform
 ## Détection d'anomalies dans les systèmes microservices
 
-> Mémoire de fin de Maîtrise — Génie Logiciel  
+> Projet technique de fin de Maîtrise — Génie Logiciel  
 > Université du Québec — 2026
 
 ---
@@ -29,8 +29,9 @@ ces systèmes sans intervention humaine.
 ## Résultats principaux
 
 - **Fusion multi-modale** : F1 = 100% (sur Train Ticket et Online Boutique)
+- **Classification supervisée du type de panne** : F1 = 63% (Random Forest, 4 classes)
 - **21+ algorithmes** évalués et comparés
-- **Pipeline fonctionnel** avec API REST et dashboard interactif
+- **Pipeline fonctionnel** avec API REST, dashboard interactif, Docker et CI/CD
 
 ---
 
@@ -56,22 +57,31 @@ ces systèmes sans intervention humaine.
 ## Architecture du projet
 
 Intelligent_observability/
-├── notebooks/ Études comparatives (11 notebooks)
+├── notebooks/ Études comparatives (13 notebooks)
 │ ├── 01_TrainTicket.ipynb
 │ ├── 02_OnlineBoutique.ipynb
 │ ├── 03-10 : détection par modalité et fusion
-│ └── 12_sauvegarde_modeles.ipynb
+│ ├── 12_sauvegarde_modeles.ipynb
+│ ├── 13_analyse_localisation.ipynb
+│ └── 14_classification_type_panne.ipynb
 ├── pipeline/ Modules Python du pipeline
 │ ├── ingestion.py Chargement des données
-│ ├── detection.py Détection + fusion + classification
+│ ├── detection.py Détection + fusion + sévérité
+│ ├── classification_type.py Classification supervisée
 │ ├── alertes.py Gestion des alertes
-│ └── main.py Orchestration
-├── models/ 6 modèles pré-entraînés (43 MB)
+│ ├── main.py Orchestration (Facade)
+│ ├── exceptions.py Hiérarchie d'exceptions
+│ └── logger.py Configuration du logging
+├── models/ 7 modèles pré-entraînés (~44 MB)
 ├── api/ API FastAPI
 ├── dashboard/ Interface Streamlit
+├── tests/ Tests automatisés (27 tests)
+├── .github/workflows/ CI/CD GitHub Actions
 ├── figures/ Graphiques générés
-├── results/ Rapports et résultats
+├── results/ Rapports et résultats (11 rapports)
 ├── data/ Dataset Nezha
+├── Dockerfile
+├── docker-compose.yml
 ├── config.yaml Configuration centralisée
 ├── requirements.txt Dépendances Python
 └── README.md
@@ -92,8 +102,13 @@ source venv/bin/activate
 # Installer les dépendances
 pip install -r requirements.txt
 
-# Télécharger les données (si pas déjà présent)
-git clone https://github.com/IntelligentDDS/Nezha.git data/nezha
+# Télécharger le dataset Nezha
+git clone https://github.com/IntelligentDDS/Nezha.git /tmp/nezha
+
+# Copier les données au bon endroit (structure attendue par le code)
+mkdir -p data/normal data/anomalies
+cp -r /tmp/nezha/construct_data/* data/normal/
+cp -r /tmp/nezha/rca_data/* data/anomalies/
 ```
 
 ---
@@ -132,6 +147,7 @@ Endpoints :
 | GET | `/api/alertes` | Consulter les alertes |
 | GET | `/api/statistiques` | Statistiques globales |
 | GET | `/api/systemes` | Systèmes supportés |
+| GET | `/api/health` | Vérification de santé |
 | GET | `/docs` | Documentation Swagger |
 
 Exemple :
@@ -152,11 +168,17 @@ streamlit run dashboard/app.py
 
 Accès : http://localhost:8501
 
-### 4. Démonstration rapide
+### 4. Déploiement avec Docker
+
+Lancer l'API et le dashboard ensemble :
 
 ```bash
-python demo.py
+docker-compose up -d
 ```
+
+Accès :
+- Dashboard : http://localhost:8501
+- API : http://localhost:8000
 
 ---
 
@@ -171,6 +193,8 @@ Le pipeline utilise des algorithmes **non supervisés adaptatifs** :
 | Traces | Isolation Forest par service | S'adapte à chaque service |
 
 Ces choix résultent d'une étude comparative de 21 algorithmes documentée dans les notebooks 03-10.
+
+Un **Random Forest** supervisé complète le pipeline pour classifier le type de panne parmi 4 catégories (voir notebook 14).
 
 ---
 
@@ -196,6 +220,16 @@ Ces choix résultent d'une étude comparative de 21 algorithmes documentée dans
 
 ---
 
+## Tests
+
+Le projet contient 27 tests automatisés (23 unitaires + 4 d'intégration) exécutés automatiquement à chaque push via GitHub Actions.
+
+```bash
+pytest tests/ -v
+```
+
+---
+
 ## Rapports détaillés
 
 Le dossier `results/` contient les rapports scientifiques du projet :
@@ -204,6 +238,8 @@ Le dossier `results/` contient les rapports scientifiques du projet :
 - `rapport_complet_onlineboutique.md` — Étude Online Boutique
 - `rapport_algorithmes_robustes.md` — Analyse de robustesse (LOF, XGBoost)
 - `rapport_fusion_multimodale.md` — Fusion multi-modale
+- `rapport_classification_type_panne.md` — Classification supervisée du type de panne
+- `rapport_plateforme_deploiement.md` — API, dashboard, Docker, CI/CD
 - `rapport_pipeline_core.md` — Documentation du pipeline
 
 ---
@@ -216,7 +252,7 @@ Le dossier `results/` contient les rapports scientifiques du projet :
 | `develop` | Intégration des features | En cours |
 | `feature/exploration-data` | Notebooks d'exploration | ✓ Mergé |
 | `feature/detection-algorithmes` | 21 algorithmes évalués | ✓ Complet |
-| `feature/pipeline-complet` | Pipeline + API + Dashboard | En cours |
+| `feature/pipeline-complet` | Pipeline + API + Dashboard + Docker + CI/CD | En cours |
 
 ---
 
@@ -231,6 +267,9 @@ Le dossier `results/` contient les rapports scientifiques du projet :
 | API | FastAPI, Uvicorn |
 | Dashboard | Streamlit |
 | Config | PyYAML |
+| Tests | pytest, pytest-cov |
+| Conteneurisation | Docker, docker-compose |
+| CI/CD | GitHub Actions |
 | Versionnement | Git, GitHub |
 | Environnement | Jupyter, venv |
 
@@ -250,10 +289,10 @@ Le dossier `results/` contient les rapports scientifiques du projet :
 
 - Analyse de graphe pour améliorer la localisation
 - Streaming temps réel (Kafka)
-- Dockerisation pour déploiement
 - Base de données pour les alertes (PostgreSQL)
 - Notifications (email, Slack, PagerDuty)
 - Pipeline MLOps (MLflow, drift detection)
+- Authentification et rate limiting sur l'API
 
 ---
 

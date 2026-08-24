@@ -92,7 +92,7 @@ Features extraites par fenêtre : nb_spans, nb_traces, nb_services, duree_moy, d
 | Algorithme | TT F1 | OB F1 | Différence |
 |------------|-------|-------|------------|
 | Autoencoder V2 | 99.6% | **99.7%** | +0.1 pts |
-| Isolation Forest | 99.6% | 88.0% | -11.6 pts |
+| Isolation Forest (contamination=0.10) | 99.6% | 88.0% | -11.6 pts |
 | Random Forest | 99.6% | 82.1% | -17.5 pts |
 | Z-score | 97.7% | 72.7% | -25.0 pts |
 

@@ -1,5 +1,9 @@
 data:
   base_path: data
+
+alertes:
+  fichier: alertes/alertes.json
+
 systemes:
   train_ticket:
     dates: [2023-01-29, 2023-01-30]

@@ -175,7 +175,21 @@ L'Autoencoder V2 par fenêtre reste inégalé pour la généralisation entre sys
 
 ---
 
-## 7. Recommandations
+## 7. Extension exploratoire — XGBoost sur logs
+
+Un test exploratoire supplémentaire a été mené pour vérifier si XGBoost, performant sur les métriques, se généralise également aux logs. Deux configurations ont été testées sur Train Ticket.
+
+**Configuration initiale** — XGBoost avec les paramètres par défaut échoue complètement (F1 = 0%) : face au déséquilibre extrême (135 anomalies vs 2 fenêtres normales), le modèle prédit systématiquement la classe majoritaire.
+
+**Configuration ajustée** — en réduisant le nombre d'arbres (50 au lieu de 100), la profondeur (max_depth=3) et en augmentant le learning_rate (0.3), XGBoost atteint **F1 = 99.3%** (VP=135, FP=2, FN=0). Cette configuration allège la capacité du modèle et le force à ne pas mémoriser mais à généraliser.
+
+Cette extension confirme qu'XGBoost peut être adapté aux logs, mais nécessite une calibration fine face à des données très déséquilibrées. L'extension sur les traces reste à mener.
+
+---
+
+---
+
+## 8. Recommandations
 
 ### Pour la production sans labels
 
@@ -195,7 +209,8 @@ Priorité 2 : Random Forest (F1 82-100%, plus classique et interprétable)
 
 ---
 
-## 8. Conclusion
+
+## 9. Conclusion
 
 Ce notebook démontre qu'il est possible d'améliorer significativement la robustesse des algorithmes de détection d'anomalies en remplaçant les approches statiques par des approches adaptatives. Les trois alternatives testées (LOF, XGBoost, One-Class SVM) réduisent toutes l'écart de performance entre Train Ticket et Online Boutique, avec des gains de stabilité allant de 7 à 37 points.
 
