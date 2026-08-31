@@ -38,3 +38,6 @@ htmlcov/
 *.bak
 *_BACKUP.*
 *_OLD.*
+
+# Captures pour le rapport (usage personnel)
+captures_rapport/

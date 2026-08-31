@@ -1,0 +1,29 @@
+[tool.black]
+line-length = 120
+target-version = ['py312']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.venv
+  | venv
+  | build
+  | dist
+  | data
+  | models
+  | htmlcov
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+known_first_party = ["pipeline", "api", "dashboard"]
+skip = ["venv", "data", "models"]
+
+[tool.flake8]
+max-line-length = 120
+max-complexity = 15
+exclude = ["venv", "data", "models", "__pycache__"]
+select = ["E9", "F63", "F7", "F82"]
