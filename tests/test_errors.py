@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
+import os
 import pytest
 
 from pipeline.ingestion import IngestionEngine
@@ -34,7 +35,7 @@ class TestValidationsIngestion:
 
     @pytest.fixture
     def engine(self):
-        return IngestionEngine(str(PROJECT_ROOT / 'data'))
+        return IngestionEngine(os.environ["DATA_PATH"])
 
     def test_date_format_invalide_leve_erreur(self, engine):
         """Une date au mauvais format doit être rejetée."""

@@ -5,6 +5,7 @@ Charge une fenêtre → détecte les anomalies → fusionne → classifie → al
 Point d'entrée principal du pipeline automatique.
 """
 
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -90,7 +91,7 @@ class PipelineComplet:
         self.config = self._charger_config(config_path)
 
         # Résoudre base_path relatif à la racine du projet
-        base_path = self.config["data"]["base_path"]
+        base_path = os.getenv("DATA_PATH") or self.config["data"]["base_path"]
         if not Path(base_path).is_absolute():
             base_path = PROJECT_ROOT / base_path
 
