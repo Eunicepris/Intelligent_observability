@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  # 
+  # ═══════════════════════════════════════════
   # API FastAPI
-  # 
+  # ═══════════════════════════════════════════
   api:
     build:
       context: .
@@ -13,9 +13,10 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # Monter les données en lecture seule
-      - ./data:/app/data:ro
-      - ./config.yaml:/app/config.yaml:ro 
+      # Données : utilise tests/mini_data par défaut
+      # Pour utiliser le dataset complet Nezha : DATA_DIR=./data docker-compose up -d
+      - ${DATA_DIR:-./tests/mini_data}:/app/data:ro
+      - ./config.yaml:/app/config.yaml:ro
       # Partager les alertes entre conteneurs
       - alertes-data:/app/alertes
     environment:
@@ -30,20 +31,20 @@ services:
     networks:
       - anomalie-network
 
-  # 
+  # ═══════════════════════════════════════════
   # Dashboard Streamlit
-  # 
+  # ═══════════════════════════════════════════
   dashboard:
     image: anomalie-detection:1.0.0
     container_name: anomalie-dashboard
     ports:
       - "8501:8501"
     volumes:
-      - ./data:/app/data:ro
+      # Données : utilise tests/mini_data par défaut
+      - ${DATA_DIR:-./tests/mini_data}:/app/data:ro
       - ./config.yaml:/app/config.yaml:ro
       - alertes-data:/app/alertes
-      - ./dashboard/app.py:/app/dashboard/app.py:ro 
-
+      - ./dashboard/app.py:/app/dashboard/app.py:ro
     environment:
       - PYTHONUNBUFFERED=1
       - API_URL=http://api:8000
@@ -54,16 +55,16 @@ services:
     networks:
       - anomalie-network
 
-# 
+# ═══════════════════════════════════════════
 # VOLUMES PERSISTANTS
-# 
+# ═══════════════════════════════════════════
 volumes:
   alertes-data:
     driver: local
 
-# 
+# ═══════════════════════════════════════════
 # RÉSEAU INTERNE
-# 
+# ═══════════════════════════════════════════
 networks:
   anomalie-network:
     driver: bridge

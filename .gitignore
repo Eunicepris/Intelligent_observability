@@ -41,3 +41,17 @@ htmlcov/
 
 # Captures pour le rapport (usage personnel)
 captures_rapport/
+
+# Fichiers de backup
+*.bak
+*.bak2
+*.backup
+*~
+
+# Fichiers d'environnement locaux (contiennent des chemins personnels)
+.env
+.env.local
+
+# Documentation de travail personnelle
+README_dataset_section.md
+tests/rapport_conftest.md
