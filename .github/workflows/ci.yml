@@ -63,7 +63,12 @@ jobs:
           pip install pytest pytest-cov httpx
       
       - name: Lancer les tests unitaires
-        run: pytest tests/test_pipeline.py -v --cov=pipeline
+        run: |
+          pytest tests/ \
+            --ignore=tests/test_integration.py \
+            -v \
+            --cov=pipeline --cov=api --cov=dashboard \
+            --cov-report=term-missing
       
       - name: Vérifier la syntaxe Python
         run: python -m py_compile pipeline/*.py api/*.py dashboard/*.py

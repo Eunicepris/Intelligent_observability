@@ -28,8 +28,11 @@ ces systèmes sans intervention humaine.
 
 ## Résultats principaux
 
-- **Fusion multi-modale** : F1 = 100% (sur Train Ticket et Online Boutique)
-- **Classification supervisée du type de panne** : F1 = 63% (Random Forest, 4 classes)
+- **Fusion multi-modale** : F1 = 100%
+- **Classification supervisée** : F1 = 63%
+- 64 tests automatisés avec 71% de couverture
+- 0 avertissement flake8 (code 100% conforme PEP 8)
+- **API REST sémantique** (200/400/404)
 - **21+ algorithmes** évalués et comparés
 - **Pipeline fonctionnel** avec API REST, dashboard interactif, Docker et CI/CD
 
@@ -150,6 +153,13 @@ Endpoints :
 | GET | `/api/health` | Vérification de santé |
 | GET | `/docs` | Documentation Swagger |
 
+
+note:
+POST /api/detecter retourne :
+200 OK : détection réussie
+400 Bad Request : entrée invalide (ex: 24_89)
+404 Not Found : fenêtre absente du dataset
+
 Exemple :
 
 ```bash
@@ -222,7 +232,14 @@ Un **Random Forest** supervisé complète le pipeline pour classifier le type de
 
 ## Tests
 
-Le projet contient 27 tests automatisés (23 unitaires + 4 d'intégration) exécutés automatiquement à chaque push via GitHub Actions.
+Le projet contient 64 tests automatisés répartis dans 4 fichiers :
+- test_pipeline.py : 23 tests unitaires (fonctions pures)
+- test_integration.py : 4 tests d'intégration (pipeline complet)
+- test_api.py : 10 tests d'API (endpoints HTTP)
+- test_pipeline_main.py : 10 tests d'orchestration
+- test_errors.py : 17 tests d'erreurs et cas limites
+
+Couverture : 71% global (89% pour l'API)
 
 ```bash
 pytest tests/ -v
@@ -284,6 +301,200 @@ Le dossier `results/` contient les rapports scientifiques du projet :
 3. **Apprentissage figé** — Les modèles ne s'adaptent pas automatiquement aux nouvelles données. Un re-entraînement périodique est recommandé.
 
 ---
+
+## Reproduire les résultats du rapport
+
+Cette section explique comment obtenir **exactement les mêmes résultats** que ceux présentés dans le rapport de projet MGL8707.
+
+### Contexte
+
+Le scénario principal du rapport (Section 3.3.5) présente l'analyse de la fenêtre `08_43` du 29 janvier 2023 sur Train Ticket, qui produit :
+
+| Élément | Valeur attendue |
+|---|---|
+| Sévérité | **WARNING** |
+| Confiance globale | **67%** (2/3 modalités) |
+| Métriques anormales | ✓ |
+| Logs anormaux | ✗ |
+| Traces anormales | ✓ |
+| Type de panne prédit | **return** |
+| Confiance du type | **90%** |
+| Action spécifique | Vérifier valeurs retournées par le service |
+
+Pour obtenir ces valeurs, il faut le **dataset Nezha complet** (~3 GB, non inclus dans le dépôt pour des raisons de taille et de licence).
+
+### Étape 1 — Télécharger le dataset Nezha
+
+```bash
+# Cloner le dépôt officiel Nezha (Yu et al., FSE 2023)
+git clone https://github.com/IntelligentDDS/Nezha.git /tmp/nezha
+```
+
+### Étape 2 — Organiser les données
+
+Le pipeline attend une structure spécifique :
+
+```bash
+# Créer la structure attendue
+mkdir -p ~/nezha_data/normal
+mkdir -p ~/nezha_data/anomalies
+
+# Copier les données normales (comportement de référence)
+cp -r /tmp/nezha/construct_data/* ~/nezha_data/normal/
+
+# Copier les données avec anomalies injectées
+cp -r /tmp/nezha/rca_data/* ~/nezha_data/anomalies/
+```
+
+Structure attendue :
+
+```
+~/nezha_data/
+├── normal/
+│   ├── 2023-01-29/
+│   │   ├── log/
+│   │   ├── metric/
+│   │   └── trace/
+│   └── 2023-01-30/
+└── anomalies/
+    ├── 2023-01-29/
+    │   ├── log/
+    │   ├── metric/
+    │   └── trace/
+    └── ...
+```
+
+### Étape 3 — Configurer le chemin avec .env
+
+```bash
+# Depuis la racine du projet
+cd Intelligent_observability
+
+# Copier le fichier d'exemple
+cp .env.example .env
+
+# Éditer .env avec l'éditeur de votre choix
+nano .env
+```
+
+Modifier la ligne dans `.env` avec le chemin **absolu** vers vos données :
+
+```
+DATA_DIR=/home/votre_utilisateur/nezha_data
+```
+
+### Étape 4 — Lancer la plateforme
+
+```bash
+# Redémarrer les conteneurs pour prendre en compte le .env
+docker-compose down
+docker-compose up -d
+
+# Attendre 30 secondes que les services démarrent
+sleep 30
+
+# Vérifier que tout est prêt
+curl http://localhost:8000/api/health
+```
+
+Réponse attendue :
+
+```json
+{"status": "healthy", "pipelines_charges": ["train_ticket", "online_boutique"]}
+```
+
+### Étape 5 — Reproduire le scénario du rapport
+
+```bash
+curl -X POST http://localhost:8000/api/detecter \
+  -H "Content-Type: application/json" \
+  -d '{"systeme": "train_ticket", "date": "2023-01-29", "window": "08_43"}' \
+  | python3 -m json.tool
+```
+
+**Réponse attendue** (identique au rapport) :
+
+```json
+{
+  "systeme": "train_ticket",
+  "fenetre": "2023-01-29 08_43",
+  "anomalie": true,
+  "severite": "WARNING",
+  "confiance": 0.6667,
+  "modalites": {
+    "metriques": true,
+    "logs": false,
+    "traces": true
+  },
+  "type_panne": {
+    "type_predit": "return",
+    "confiance": 0.9,
+    "probabilites": {
+      "cpu_problem": 0.0,
+      "exception": 0.1,
+      "network_delay": 0.0,
+      "return": 0.9
+    },
+    "action_specifique": "Vérifier valeurs retournées par le service"
+  },
+  "action": "Alerte modérée — investigation à planifier"
+}
+```
+
+### Étape 6 — Utiliser le dashboard
+
+**Accès** : http://localhost:8501
+
+**Reproduction du scénario dans le dashboard** :
+
+1. Ouvrir l'onglet **Détection**
+2. Sélectionner :
+   - Système : `train_ticket`
+   - Date : `2023-01-29`
+   - Fenêtre : `08_43`
+3. Cliquer sur **Lancer l'analyse**
+4. Le résultat WARNING/return à 67% s'affiche
+
+### Autres scénarios validés
+
+| Fenêtre (Train Ticket, 2023-01-29) | Sévérité attendue | Type de panne |
+|---|---|---|
+| `08_43` | WARNING | return |
+| `24_89` | HTTP 400 (format invalide) | - |
+| `11_51` | HTTP 404 (fenêtre absente) | - |
+
+### Sans le dataset complet
+
+Si vous ne pouvez pas télécharger Nezha, le projet fonctionne quand même avec le **mini-dataset intégré** (`tests/mini_data/`), mais les résultats seront différents :
+
+- La fenêtre `08_43` retournera **LOW** au lieu de WARNING
+- La confiance sera plus faible (33% au lieu de 67%)
+- Le type de panne prédit peut varier
+- **La plateforme fonctionne normalement**, c'est juste que le dataset restreint donne moins de signal
+
+Ce mode est parfait pour :
+- Découvrir la plateforme rapidement
+- Développer de nouvelles fonctionnalités
+- Exécuter le CI/CD automatique
+- Faire des démos
+
+### Dépannage
+
+**Problème** : Après `docker-compose up`, l'API répond mais la détection retourne "fenêtre non trouvée".
+**Solution** : Vérifier que le chemin dans `.env` est correct :
+```bash
+docker-compose config | grep -A 2 volumes
+# Doit afficher le vrai chemin de vos données
+```
+
+**Problème** : Résultats différents de ceux du rapport.
+**Solution** : Vérifier que `.env` existe et pointe vers Nezha complet. Redémarrer :
+```bash
+docker-compose down && docker-compose up -d
+```
+
+**Problème** : `.env` n'est pas pris en compte.
+**Solution** : Vérifier que `.env` est bien à la racine du projet (même dossier que `docker-compose.yml`) et redémarrer.
 
 ## Perspectives futures
 
