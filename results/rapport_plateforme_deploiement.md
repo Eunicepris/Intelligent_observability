@@ -1,168 +1,345 @@
 # Rapport — Plateforme de déploiement
-## API REST, Dashboard interactif, Docker et CI/CD
+## API REST, Dashboard, Docker, Tests et CI/CD
 
 ---
 
-## 1. Vue d'ensemble
+## 1. Introduction
 
-### 1.1 Contexte
+Après avoir construit le pipeline de détection multi-modale (F1 = 100%) et ajouté la classification supervisée du type de panne (F1 = 63%), il fallait rendre le tout utilisable en vrai. Un script Python qu'on lance à la main dans un terminal, c'est bien pour explorer, mais ça ne suffit pas quand on veut qu'un opérateur SRE puisse s'en servir au quotidien ou qu'on puisse intégrer la détection dans un système existant.
 
-Après avoir construit le pipeline de détection d'anomalies (F1 = 100%) et ajouté la classification supervisée du type de panne (F1 = 63%), il fallait rendre le système **utilisable par des opérateurs**. Un script Python en ligne de commande ne suffit pas — il faut une interface, une API pour l'intégration, un déploiement portable et un système de tests automatisés.
+C'est là que la partie "génie logiciel" du projet a pris tout son sens. Il a fallu construire autour du pipeline une vraie plateforme : une API pour accéder aux fonctionnalités programmatiquement, un dashboard pour visualiser les résultats, une conteneurisation pour pouvoir déployer facilement, des tests automatisés pour garantir que rien ne casse quand on modifie quelque chose, et un pipeline CI/CD pour tout ça fonctionne de manière continue.
 
-Ce rapport documente la construction de la plateforme complète de déploiement : API REST, dashboard interactif, conteneurisation Docker, tests unitaires et pipeline CI/CD.
-
-### 1.2 Objectifs
-
-- Exposer le pipeline via une API REST documentée
-- Créer un dashboard visuel pour les opérateurs
-- Conteneuriser l'application pour un déploiement portable
-- Automatiser les tests à chaque changement
-- Préparer un déploiement continu
-
-### 1.3 Résultat principal
-
-Une plateforme complète, opérationnelle et déployable :
-
-| Composante | Technologie | Statut |
-|------------|-------------|--------|
-| API REST | FastAPI + Uvicorn | ✓ Fonctionnelle |
-| Dashboard | Streamlit + Plotly | ✓ Fonctionnel |
-| Conteneurisation | Docker + docker-compose | ✓ Opérationnel |
-| Tests | pytest (23 tests) | ✓ 100% passent |
-| CI | GitHub Actions | ✓ Configuré |
-
-**En une seule commande** (`docker-compose up`), un utilisateur peut lancer toute la plateforme.
+Ce rapport documente cette phase de construction, avec les choix qui ont été faits, les difficultés rencontrées, et les évolutions du code au fil du projet.
 
 ---
 
-## 2. Architecture globale
+## 2. Vue d'ensemble de la plateforme
 
-### 2.1 Vue d'ensemble
+### 2.1 Ce qui a été livré
+
+Concrètement, la plateforme finale comprend :
+
+- Un **pipeline modulaire** en Python (5 modules qui font chacun une chose précise)
+- Une **API REST** avec FastAPI (7 endpoints)
+- Un **dashboard interactif** avec Streamlit (3 onglets)
+- Une **conteneurisation** avec Docker et docker-compose (2 services)
+- **27 tests automatisés** (23 unitaires + 4 d'intégration)
+- Un **pipeline CI/CD** sur GitHub Actions (5 jobs)
+- La **publication automatique** de l'image Docker sur GitHub Container Registry
+
+En une seule commande (`docker-compose up`), un utilisateur peut lancer toute la plateforme sur sa machine.
+
+### 2.2 Architecture générale
+
+L'architecture est organisée en 4 couches distinctes, chacune ayant une 
+responsabilité claire.
+
+L┌─────────────────────────────────────────────────────────────────────┐
+│                          COUCHE PRÉSENTATION                        │
+│                                                                     │
+│                      Utilisateur (SRE / DevOps)                     │
+│                              │                                      │
+│                              ▼                                      │
+│                    ┌──────────────────┐                             │
+│                    │    DASHBOARD     │                             │
+│                    │   (Streamlit)    │                             │
+│                    │   Port 8501      │                             │
+│                    └────────┬─────────┘                             │
+└─────────────────────────────┼───────────────────────────────────────┘
+                              │
+                              │  Requêtes HTTP / JSON
+                              │  (POST /api/detecter)
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                          COUCHE INTERFACE                           │
+│                                                                     │
+│                    ┌──────────────────┐                             │
+│                    │      API REST    │                             │
+│                    │    (FastAPI)     │                             │
+│                    │   Port 8000      │                             │
+│                    │                  │                             │
+│                    │  Endpoints :     │                             │
+│                    │  • /api/detecter │                             │
+│                    │  • /api/alertes  │                             │
+│                    │  • /api/health   │                             │
+│                    └────────┬─────────┘                             │
+└─────────────────────────────┼───────────────────────────────────────┘
+                              │
+                              │  Appels Python
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                          COUCHE MÉTIER                              │
+│                                                                     │
+│              ┌───────────────────────────────┐                      │
+│              │       PIPELINE COMPLET        │                      │
+│              │      (pipeline/main.py)       │                      │
+│              │        (Pattern Facade)       │                      │
+│              └───┬───────┬───────┬───────┬───┘                      │
+│                  │       │       │       │                          │
+│                  ▼       ▼       ▼       ▼                          │
+│              ┌─────┐ ┌─────┐ ┌──────┐ ┌────────┐                    │
+│              │ Ing │ │ Dét │ │Class │ │Alertes │                    │
+│              │ ges │ │ ect │ │if.   │ │        │                    │
+│              │ tion│ │ ion │ │Type  │ │        │                    │
+│              └──┬──┘ └──┬──┘ └───┬──┘ └───┬────┘                    │
+└─────────────────┼───────┼────────┼────────┼─────────────────────────┘
+                  │       │        │        │
+                  ▼       ▼        ▼        ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        COUCHE DONNÉES                               │
+│                                                                     │
+│    ┌─────────────┐   ┌──────────────┐   ┌───────────────┐           │
+│    │  DONNÉES    │   │  MODÈLES ML  │   │   ALERTES     │           │
+│    │  (Nezha)    │   │   (.pkl)     │   │  (JSON)       │           │
+│    │             │   │              │   │               │           │
+│    │  data/      │   │  models/     │   │  alertes.json │           │
+│    │  ├anomalies │   │  ├lof_*.pkl  │   │               │           │
+│    │  └normal    │   │  ├tfidf_*.pkl│   │               │           │
+│    │             │   │  ├if_*.pkl   │   │               │           │
+│    │             │   │  └classifier │   │               │           │
+│    │             │   │    _type.pkl │   │               │           │
+│    └─────────────┘   └──────────────┘   └───────────────┘           │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+L'idée était de bien séparer les préoccupations : le dashboard ne fait que de l'affichage, l'API expose la logique métier via HTTP, et le pipeline gère toute l'analyse. Comme ça, on peut modifier une partie sans toucher aux autres — par exemple, si demain on veut remplacer le dashboard Streamlit par une interface React, on n'a rien à changer dans le pipeline ni dans l'API.
+
+### Rôle de chaque couche
+
+**Couche présentation** : c'est ce que voit l'utilisateur — un dashboard 
+web accessible via le navigateur. Elle ne fait aucun calcul et se contente 
+d'afficher les résultats fournis par l'API.
+
+**Couche interface** : l'API REST expose les fonctionnalités du pipeline 
+via HTTP. Elle joue le rôle de point d'entrée programmatique et gère la 
+validation des requêtes, la sérialisation JSON, et la traduction des 
+erreurs en codes HTTP appropriés.
+
+**Couche métier** : le cœur du système. Le pipeline (via le pattern Facade) 
+orchestre 4 modules spécialisés : Ingestion (chargement des données), 
+Détection (les 3 algorithmes ML), Classification du type de panne 
+(Random Forest supervisé), et Alertes (persistance).
+
+**Couche données** : les ressources persistantes du système. Elle contient 
+les données brutes de Nezha, les modèles ML pré-entraînés, et le fichier 
+JSON qui accumule les alertes.
+
+Cette séparation permet à chaque couche d'évoluer indépendamment. Par 
+exemple, si demain on veut remplacer le dashboard Streamlit par une 
+interface React, on n'a rien à changer dans l'API ni dans le pipeline. 
+De même, l'API pourrait être appelée par un autre système (script 
+d'automatisation, outil de monitoring externe) sans passer par le dashboard.
+---
+
+## 3. Le pipeline Python
+
+### 3.1 Structure modulaire
+
+Le pipeline est organisé en 5 modules dans le dossier `pipeline/` :
+
+| Module | Rôle |
+|---|---|
+| `ingestion.py` | Charge les données Nezha (métriques, logs, traces) |
+| `detection.py` | Applique les 3 algorithmes de détection (LOF, TF-IDF, IF) |
+| `classification_type.py` | Prédit le type de panne avec Random Forest |
+| `alertes.py` | Gère la persistance des alertes dans un fichier JSON |
+| `main.py` | Orchestre tout (Facade sur les autres modules) |
+
+Cette séparation vient naturellement quand on essaie de transformer des cellules de notebook en code propre : chaque grande étape devient un module, chaque grande responsabilité devient une classe.
+
+### 3.2 Le pattern Facade avec injection de dépendances
+
+La classe `PipelineComplet` (dans `pipeline/main.py`) applique un pattern Facade : elle expose une interface simple (`traiter_fenetre`, `traiter_batch`) qui cache toute la complexité de l'orchestration.
+
+Voici à quoi ressemble son initialisation :
+
+```python
+class PipelineComplet:
+    def __init__(
+        self,
+        systeme='train_ticket',
+        config_path='config.yaml',
+        ingestion=None,
+        detecteur=None,
+        alertes=None,
+        classificateur=None,
+    ):
+        self.config = self._charger_config(config_path)
+        
+        # Injection de dépendances (avec valeurs par défaut)
+        self.ingestion = ingestion or IngestionEngine(self.config['data']['base_path'])
+        self.detecteur = detecteur or DetecteurAnomalies(systeme=systeme)
+        self.alertes = alertes or SystemeAlertes()
+        self.classificateur = classificateur or ClassificateurTypePanne()
+```
+
+L'astuce ici, c'est que les composants peuvent être **injectés** au constructeur. Pourquoi c'est important ? Parce que ça permet :
+
+- **De tester en isolation** : dans un test, on peut passer un faux `IngestionEngine` qui retourne des données de test, sans avoir besoin des vrais fichiers Nezha.
+- **D'échanger les implémentations** : si demain on veut ajouter un `DetecteurAnomaliesV2` avec un algorithme différent, on peut l'injecter sans modifier le pipeline.
+- **De garder la simplicité** : si on ne passe rien, ça marche avec les valeurs par défaut, comme avant.
+
+Au début du projet, cette injection n'existait pas — j'instanciais directement les composants dans le constructeur. Le refactoring pour ajouter cette injection s'est fait vers la fin, quand j'ai réalisé que c'était une pratique standard en génie logiciel.
+
+### 3.3 Hiérarchie d'exceptions personnalisées
+
+Une des choses qui m'a fait évoluer le code, c'était de me rendre compte que les erreurs génériques (`Exception`, `ValueError`) ne suffisaient pas. Quand quelque chose plante, on veut savoir **pourquoi** et **à quel niveau**.
+
+J'ai donc créé une petite hiérarchie d'exceptions dans `pipeline/exceptions.py` :
+
+```python
+class PipelineError(Exception):
+    """Exception de base du pipeline."""
+    pass
+
+class ConfigurationError(PipelineError):
+    """Erreur liée à la configuration (config.yaml)."""
+    pass
+
+class DataError(PipelineError):
+    """Erreur liée aux données (fichier, format, validation)."""
+    pass
+
+class ModelError(PipelineError):
+    """Erreur liée aux modèles ML (chargement, prédiction)."""
+    pass
+```
+
+Comme ça, quand l'API reçoit une exception, elle sait quoi faire :
+- `DataError` → HTTP 404 (données introuvables)
+- `ModelError` → HTTP 500 (problème serveur)
+- `ConfigurationError` → HTTP 500 (mauvaise config)
+
+C'est plus propre que de tout retourner en 500.
+
+### 3.4 Logging systématique
+
+Autre chose qui m'a semblé évidente en cours de route : sans logs, on est aveugle. Impossible de savoir ce que fait le pipeline en production.
+
+J'ai créé un petit module `pipeline/logger.py` qui centralise la configuration :
+
+```python
+from pipeline.logger import setup_logging
+logger = setup_logging(__name__)
+
+logger.info(f"Pipeline initialisé pour {systeme}")
+logger.warning(f"Fichier introuvable : {chemin}")
+logger.error(f"Erreur de prédiction : {e}")
+```
+
+Résultat : quand on lance le pipeline, on voit tout ce qui se passe :
 
 ```
-┌─────────────┐         ┌──────────────┐         ┌──────────────┐
-│             │         │              │         │              │
-│  UTILISATEUR│───HTTP─▶│  DASHBOARD   │───HTTP─▶│     API      │
-│             │         │  (Streamlit) │         │   (FastAPI)  │
-│  Navigateur │◀────────│              │◀────────│              │
-│             │         │              │         │              │
-└─────────────┘         └──────────────┘         └──────┬───────┘
-                                                        │
-                                                        │
-                                                        ▼
-                                                ┌──────────────┐
-                                                │              │
-                                                │   PIPELINE   │
-                                                │  (Python)    │
-                                                │              │
-                                                └──────┬───────┘
-                                                        │
-                                                ┌───────┴───────┐
-                                                │               │
-                                                ▼               ▼
-                                        ┌──────────┐  ┌──────────┐
-                                        │  MODÈLES │  │ DONNÉES  │
-                                        │   .pkl   │  │  Nezha   │
-                                        └──────────┘  └──────────┘
+2026-08-13 - pipeline.main - INFO - Pipeline initialisé pour train_ticket
+2026-08-13 - pipeline.ingestion - INFO - Métriques chargées : 42274 lignes
+2026-08-13 - pipeline.detection - INFO - Détections : 2/3 modalités
+2026-08-13 - pipeline.classification_type - INFO - Type prédit : return (confiance 90%)
+2026-08-13 - pipeline.alertes - INFO - Alerte WARNING enregistrée
 ```
 
-### 2.2 Séparation des responsabilités
-
-- **Dashboard** : interface utilisateur uniquement, ne fait pas de calcul
-- **API** : logique métier exposée via HTTP
-- **Pipeline** : orchestration des modules de détection et classification
-- **Modèles** : artefacts pré-entraînés chargés une seule fois
-
-### 2.3 Communication
-
-Toutes les communications utilisent HTTP/JSON :
-- Dashboard → API : appels REST
-- API → Pipeline : appels Python directs
-- Pipeline → Modèles : lecture pickle
+C'est particulièrement utile dans Docker, où on peut suivre les logs en temps réel avec `docker-compose logs -f api`.
 
 ---
 
-## 3. API REST — FastAPI
+## 4. L'API REST
 
-### 3.1 Choix de FastAPI
+### 4.1 Pourquoi FastAPI
 
-**Justification** :
-- Documentation Swagger automatique (essentielle pour un projet académique)
-- Validation Pydantic native (schémas typés)
-- Performance élevée (basé sur Starlette/Uvicorn)
-- Développement rapide (moins de boilerplate que Flask)
-- Support async natif
+J'ai choisi FastAPI pour plusieurs raisons :
 
-### 3.2 Endpoints exposés
+- **La documentation Swagger se génère automatiquement**. C'est un énorme avantage pour un projet académique : je n'ai pas eu à écrire de documentation manuelle pour l'API, elle apparaît toute seule à l'URL `/docs`.
+- **La validation Pydantic est native**. Je définis mes schémas d'entrée/sortie une fois, et FastAPI valide tout automatiquement.
+- **C'est moderne**. Les concepts (async, type hints, lifespan) reflètent les bonnes pratiques Python actuelles.
+- **C'est rapide à développer**. Beaucoup moins de code répétitif qu'avec Flask.
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/` | Page d'accueil avec liste des endpoints |
-| GET | `/docs` | Documentation Swagger interactive |
-| GET | `/api/health` | Vérification de santé (pour monitoring) |
-| GET | `/api/systemes` | Liste des systèmes supportés |
-| POST | `/api/detecter` | Analyse d'une fenêtre |
-| GET | `/api/alertes` | Historique des alertes (avec filtres) |
-| GET | `/api/statistiques` | Statistiques globales |
+### 4.2 Les endpoints
 
-### 3.3 Schémas de données
+L'API expose 7 endpoints organisés en catégories (grâce aux tags OpenAPI) :
 
-Validation stricte via Pydantic v2 :
+**Général** :
+- `GET /` — Page d'accueil avec la liste des endpoints
+- `GET /api/health` — Vérification de santé (utilisé par Docker)
 
-**Requête de détection** :
-```python
-class RequeteDetection(BaseModel):
-    systeme: str = Field(..., description="'train_ticket' ou 'online_boutique'")
-    date   : str = Field(..., description="Format YYYY-MM-DD")
-    window : str = Field(..., description="Format HH_MM")
-```
+**Systèmes** :
+- `GET /api/systemes` — Liste des systèmes supportés
 
-**Réponse de détection** :
-```python
-class ResultatDetection(BaseModel):
-    systeme   : str
-    fenetre   : str
-    anomalie  : bool
-    severite  : str
-    confiance : float
-    modalites : Modalites
-    type_panne: Optional[Dict] = None
-    action    : str
-```
+**Détection** :
+- `POST /api/detecter` — Analyse d'une fenêtre temporelle
 
-### 3.4 Chargement des pipelines au démarrage
+**Alertes** :
+- `GET /api/alertes` — Consultation avec filtres (limite, sévérité, système)
+- `GET /api/statistiques` — Agrégats globaux
 
-Optimisation critique : les pipelines des deux systèmes sont **chargés une seule fois** au démarrage de l'API, pas à chaque requête.
+Et la documentation interactive :
+- `GET /docs` — Swagger UI (généré automatiquement)
+
+### 4.3 Chargement des pipelines au démarrage
+
+Un des trucs importants que j'ai appris avec FastAPI, c'est le **lifespan**. Au lieu de charger les modèles à chaque requête (ce qui serait catastrophique — 10-15 secondes par requête), on les charge une seule fois au démarrage :
 
 ```python
-pipelines: Dict[str, PipelineComplet] = {
-    'train_ticket'   : PipelineComplet(systeme='train_ticket'),
-    'online_boutique': PipelineComplet(systeme='online_boutique'),
-}
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Démarrage de l'API — chargement des pipelines")
+    pipelines['train_ticket'] = PipelineComplet(systeme='train_ticket')
+    pipelines['online_boutique'] = PipelineComplet(systeme='online_boutique')
+    logger.info(f"Pipelines chargés : {list(pipelines.keys())}")
+    yield
+    logger.info("Arrêt de l'API")
 ```
 
-**Impact** :
-- Temps de démarrage : ~10 secondes (chargement des modèles)
-- Temps de réponse par requête : ~200 ms (détection + classification)
-- Sans cette optimisation : chaque requête aurait pris 5-10 secondes
+Résultat : le démarrage prend environ 10 secondes (chargement des 6 modèles pré-entraînés), puis chaque requête `/api/detecter` prend seulement 200-800 ms. Sans cette optimisation, c'était injouable.
 
-### 3.5 CORS et sécurité
+### 4.4 Middleware de logging
 
-Configuration CORS ouverte pour permettre au dashboard d'appeler l'API :
+J'ai ajouté un middleware qui trace automatiquement toutes les requêtes HTTP :
 
 ```python
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    debut = time.time()
+    reponse = await call_next(request)
+    duree_ms = (time.time() - debut) * 1000
+    logger.info(f"{request.method} {request.url.path} → {reponse.status_code} ({duree_ms:.0f}ms)")
+    return reponse
 ```
 
-**Note** : cette configuration est acceptable pour un environnement académique. En production, les origines seraient restreintes.
+Ce qui donne en pratique :
 
-### 3.6 Exemple d'utilisation
+```
+GET /api/health → 200 (4ms)
+POST /api/detecter → 200 (844ms)
+```
+
+Très utile pour comprendre les temps de réponse et déboguer.
+
+### 4.5 Gestion des erreurs HTTP
+
+Au début, mon API retournait tout en HTTP 500 quand quelque chose plantait. C'était laid et pas informatif. Avec les exceptions personnalisées du pipeline, j'ai pu faire une gestion propre :
+
+```python
+try:
+    return pipeline.traiter_fenetre(requete.date, requete.window)
+except DataError as e:
+    raise HTTPException(status_code=404, detail=f"Données introuvables : {e}")
+except (ModelError, PipelineError) as e:
+    logger.error(f"Erreur pipeline : {e}")
+    raise HTTPException(status_code=500, detail=f"Erreur pipeline : {e}")
+```
+
+Maintenant :
+- 400 si le système est inconnu ou les paramètres sont invalides
+- 404 si les données ne sont pas trouvées
+- 422 si la validation Pydantic échoue (format de date incorrect, etc.)
+- 500 pour les erreurs internes
+
+C'est beaucoup plus RESTful et professionnel.
+
+### 4.6 Un exemple concret
+
+Un appel typique à l'API :
 
 ```bash
 curl -X POST http://localhost:8000/api/detecter \
@@ -174,7 +351,8 @@ curl -X POST http://localhost:8000/api/detecter \
   }'
 ```
 
-**Réponse** :
+Retourne :
+
 ```json
 {
   "systeme": "train_ticket",
@@ -202,98 +380,82 @@ curl -X POST http://localhost:8000/api/detecter \
 }
 ```
 
+L'opérateur SRE a tout ce qu'il faut : niveau de sévérité, quelles modalités ont détecté, quel type de panne, et quoi faire.
+
 ---
 
-## 4. Dashboard — Streamlit
+## 5. Le dashboard Streamlit
 
-### 4.1 Choix de Streamlit
+### 5.1 Pourquoi Streamlit
 
-**Justification** :
-- Développement extrêmement rapide (moins de code que React/Vue)
+Streamlit a été un choix pragmatique. J'aurais pu faire un dashboard en React ou en Vue, mais ça aurait pris des semaines. Avec Streamlit, on peut avoir un dashboard fonctionnel en quelques heures :
+
+- Pas besoin de connaître le frontend
 - Intégration native avec pandas et matplotlib
 - Rechargement automatique en développement
-- Composants prêts à l'emploi (tables, graphiques, métriques)
-- Adapté aux data scientists
+- Composants prêts à l'emploi (tableaux, graphiques, métriques)
 
-### 4.2 Structure en 3 onglets
+L'inconvénient c'est que ce n'est pas fait pour la production à grande échelle, mais pour un projet académique et une démonstration, c'est largement suffisant.
+
+### 5.2 Structure en 3 onglets
+
+Le dashboard s'organise en 3 onglets :
 
 **Onglet 1 — Détection** :
-- Sélection du système et de la fenêtre
+- Sélection du système (Train Ticket / Online Boutique)
+- Saisie de la date et de la fenêtre
 - Bouton "Lancer l'analyse"
-- Affichage détaillé du résultat
+- Affichage détaillé du résultat avec émojis pour la sévérité
 - Section "Type de panne prédit" avec graphique de probabilités
 
 **Onglet 2 — Alertes** :
-- Historique complet avec filtres
+- Historique complet avec filtres (sévérité, système)
 - Compteurs par sévérité
 - Tableau interactif
 
 **Onglet 3 — Statistiques** :
-- Métriques globales
-- Distribution par sévérité (graphique)
+- Métriques globales (total, répartition)
+- Distribution par sévérité (graphique Plotly)
 - Distribution par système
 
-### 4.3 Composants visuels
+### 5.3 Communication avec l'API
 
-**Métriques mises en avant** :
-```python
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.error(f"🚨 {severite}")
-with col2:
-    st.metric("Confiance", f"{conf_pct:.0f}%")
-```
-
-**Graphiques Plotly** :
-```python
-fig = px.bar(df_mod, x="Modalité", y="Détecte",
-             color="Détecte",
-             color_continuous_scale=["#4CAF50", "#F44336"])
-```
-
-**Badge de santé de l'API** dans la sidebar :
-```python
-try:
-    r_health = requests.get(f"{API_URL}/api/health", timeout=2)
-    if r_health.ok:
-        st.sidebar.success("✓ API opérationnelle")
-    else:
-        st.sidebar.error("✗ API en erreur")
-except requests.RequestException:
-    st.sidebar.error("✗ API inaccessible")
-```
-
-### 4.4 Configuration adaptable
-
-Le dashboard lit l'URL de l'API depuis les variables d'environnement :
+Le dashboard ne fait aucun calcul — il appelle simplement l'API et affiche les résultats. La séparation est totale :
 
 ```python
 API_URL = os.getenv("API_URL", "http://localhost:8000")
+
+response = requests.post(f"{API_URL}/api/detecter", json={
+    "systeme": systeme,
+    "date": date,
+    "window": window,
+})
+resultat = response.json()
 ```
 
-**Impact** :
-- En local : utilise `http://localhost:8000`
-- Dans Docker : utilise `http://api:8000` (nom du container)
-
-Cette abstraction permet le déploiement dans différents contextes sans modification du code.
+Le fait que l'URL de l'API soit une variable d'environnement permet au dashboard de fonctionner :
+- En local : il tape sur `http://localhost:8000`
+- Dans Docker : il tape sur `http://api:8000` (nom du container)
 
 ---
 
-## 5. Conteneurisation — Docker
+## 6. La conteneurisation Docker
 
-### 5.1 Motivation
+### 6.1 Pourquoi Docker
 
-Sans Docker, l'installation du projet nécessite :
+Sans Docker, installer le projet nécessiterait :
 - Python 3.12
-- 40+ dépendances Python (avec versions spécifiques)
-- Configuration des chemins
-- Chargement des modèles
+- 40+ dépendances avec des versions précises
+- La configuration des chemins
+- Le chargement des modèles
 
-Avec Docker : **une seule commande** — `docker-compose up`.
+Avec Docker, c'est une seule commande : `docker-compose up`. Point.
 
-### 5.2 Dockerfile
+C'est un vrai game changer pour la reproductibilité et pour permettre à n'importe qui de lancer le projet.
 
-Image basée sur Python 3.12-slim (léger, environ 150 MB) :
+### 6.2 Le Dockerfile
+
+L'image est basée sur `python:3.12-slim` (léger, environ 150 MB de base) :
 
 ```dockerfile
 FROM python:3.12-slim
@@ -304,16 +466,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Installer les dépendances système minimales
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Copier requirements.txt d'abord (pour cache Docker)
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copier le code
 COPY pipeline/ ./pipeline/
 COPY api/ ./api/
 COPY dashboard/ ./dashboard/
@@ -323,15 +482,16 @@ COPY config.yaml .
 EXPOSE 8000 8501
 ```
 
-### 5.3 docker-compose.yml
+L'ordre est important : on copie `requirements.txt` en premier pour bénéficier du cache Docker (si le code change mais pas les dépendances, on ne refait pas l'installation).
 
-Orchestration de deux services :
+### 6.3 docker-compose pour deux services
+
+Un seul Dockerfile mais deux services qui utilisent la même image :
 
 ```yaml
 services:
   api:
     build: .
-    image: anomalie-detection:1.0.0
     container_name: anomalie-api
     ports:
       - "8000:8000"
@@ -341,405 +501,227 @@ services:
       - alertes-data:/app/alertes
     command: uvicorn api.main:app --host 0.0.0.0 --port 8000
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; ..."]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 30s
-    restart: unless-stopped
-    networks:
-      - anomalie-network
 
   dashboard:
     image: anomalie-detection:1.0.0
     container_name: anomalie-dashboard
     ports:
       - "8501:8501"
-    volumes:
-      - ./data:/app/data:ro
-      - ./config.yaml:/app/config.yaml:ro
-      - alertes-data:/app/alertes
     environment:
       - API_URL=http://api:8000
     command: streamlit run dashboard/app.py --server.address=0.0.0.0
     depends_on:
       - api
-
-volumes:
-  alertes-data:
-
-networks:
-  anomalie-network:
-    driver: bridge
 ```
 
-### 5.4 Défis rencontrés et résolus
+Les deux services communiquent via un réseau bridge interne (`anomalie-network`). Le dashboard trouve l'API via le DNS interne de Docker (`api:8000`).
 
-**Défi 1 — Version scikit-learn** :
-- Les modèles étaient sauvegardés avec sklearn 1.8.0
-- Docker installait sklearn 1.9.0
-- Les modèles se chargeaient mais produisaient des résultats invalides
-- **Solution** : fixer `scikit-learn==1.8.0` dans `requirements.txt`
+### 6.4 Les bugs Docker que j'ai galéré à résoudre
 
-**Défi 2 — Liens symboliques** :
-- Le dossier `data/` contenait des liens symboliques vers un chemin externe
-- Docker ne peut pas suivre ces liens
-- **Solution** : copier les vraies données dans le projet (2.8 GB)
-- **Ajout** : `data/` dans `.gitignore` pour éviter de commit les données
+La mise en place de Docker ne s'est pas faite sans mal. J'ai passé un temps considérable à résoudre 6 bugs différents, ce qui m'a beaucoup appris sur les subtilités de la conteneurisation.
 
-**Défi 3 — Chemin absolu dans config.yaml** :
-- Le chemin `/home/eunice/...` n'existait pas dans le container
-- **Solution 1** : chemin relatif `data` au lieu du chemin absolu
-- **Solution 2** : monter config.yaml comme volume pour hot-reload
+**Bug 1 — Incompatibilité scikit-learn**
 
-**Défi 4 — Schéma Pydantic incomplet** :
-- Le champ `type_panne` n'était pas dans le schéma de réponse
-- L'API le filtrait avant renvoi
-- **Solution** : ajouter `type_panne: Optional[Dict]` au schéma
+Les modèles avaient été sauvegardés avec `scikit-learn 1.8.0`, mais Docker installait `1.9.0` par défaut. Les modèles se chargeaient sans erreur mais donnaient des résultats bizarres. Solution : figer la version dans `requirements.txt` avec `scikit-learn==1.8.0`. Ça m'a appris qu'en ML, la reproductibilité passe par le figage des versions.
 
-### 5.5 Volumes et persistance
+**Bug 2 — Liens symboliques**
 
-**Volumes montés** :
-- `./data:/app/data:ro` — données Nezha en lecture seule
-- `./config.yaml:/app/config.yaml:ro` — configuration en lecture seule
-- `alertes-data:/app/alertes` — volume Docker pour les alertes (persistance)
+Mon dossier `data/` contenait des liens symboliques vers un autre chemin sur ma machine. Docker ne peut pas suivre ces liens. Solution : copier les vraies données (2.8 GB) dans le projet et ajouter `data/` au `.gitignore`.
 
-**Volume dashboard** (dev uniquement) :
-- `./dashboard/app.py:/app/dashboard/app.py:ro` — hot-reload du code dashboard
+**Bug 3 — Chemin absolu dans config.yaml**
 
-### 5.6 Réseau interne
+Le config.yaml contenait un chemin `/home/eunice/...` qui n'existait évidemment pas dans le container. Solution : passer à un chemin relatif (`data`) et monter le config.yaml comme volume pour pouvoir le modifier sans reconstruire l'image.
 
-Les deux containers communiquent via un réseau bridge nommé `anomalie-network`. Le dashboard résout `api:8000` grâce au DNS interne de Docker.
+**Bug 4 — Schéma Pydantic incomplet**
 
-### 5.7 Healthcheck
+J'avais ajouté le champ `type_panne` dans le résultat du pipeline mais oublié de le déclarer dans le schéma `ResultatDetection` de l'API. Résultat : le dashboard ne recevait jamais le type de panne. Solution : ajouter `type_panne: Optional[Dict] = None` au schéma.
 
-L'API expose un endpoint `/api/health` utilisé par Docker pour vérifier la santé :
+**Bug 5 — Dashboard qui ne voit pas les modifs**
 
-```yaml
-healthcheck:
-  test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
-  interval: 30s
-  timeout: 10s
-  retries: 3
-```
+En développement, je modifiais `dashboard/app.py` mais je ne voyais pas les changements. Il fallait rebuild l'image à chaque fois. Solution : monter le fichier comme volume : `./dashboard/app.py:/app/dashboard/app.py:ro`.
 
-En cas de défaillance, Docker peut redémarrer automatiquement le container.
+**Bug 6 — Containers créés mais pas démarrés**
+
+Au début, j'utilisais `docker start` sur les containers, mais ça ne suffisait pas. Il fallait `docker-compose up -d` pour bien démarrer avec toute la configuration.
+
+Ces galères sont formatrices — on comprend mieux comment Docker fonctionne en interne.
 
 ---
 
-## 6. Tests automatisés
+## 7. Les tests automatisés
 
-### 6.1 Choix de pytest
+### 7.1 Pourquoi pytest
 
-**Justification** :
-- Standard de facto en Python
-- Syntaxe simple (pas de boilerplate)
-- Fixtures puissantes
-- Excellente intégration avec CI
+Pytest est le standard Python de facto :
+- Syntaxe simple (moins de code répétitif que unittest)
+- Fixtures puissantes pour la gestion des données de test
+- Excellente intégration avec les pipelines CI/CD
+- Rapports clairs quand un test échoue
 
-### 6.2 Structure des tests
+### 7.2 Deux catégories de tests
 
-**Fichier `tests/test_pipeline.py`** — 23 tests organisés en 5 classes :
+**23 tests unitaires** (dans `tests/test_pipeline.py`) qui vérifient les fonctions pures du pipeline. Ils ne dépendent d'aucune donnée externe et s'exécutent en moins d'une seconde :
 
 ```python
 class TestFusion:               # 8 tests
-    """Fusion multi-modale"""
-    
 class TestClassification:       # 4 tests
-    """Classification par sévérité"""
-    
 class TestScoreConfiance:       # 4 tests
-    """Calcul de confiance"""
-    
 class TestActions:              # 4 tests
-    """Actions recommandées"""
-    
 class TestAlertes:              # 3 tests
-    """Système d'alertes"""
 ```
 
-### 6.3 Exemple de test
+Exemple d'un test unitaire :
 
 ```python
 def test_critical(self):
-    """Test que 3 modalités détectent → CRITICAL."""
+    """3 modalités qui détectent → CRITICAL."""
     detections = {'metriques': True, 'logs': True, 'traces': True}
     assert classifier(detections) == 'CRITICAL'
+```
 
-def test_or_avec_une_detection(self):
-    """Test que OR détecte avec 1 seule modalité."""
-    detections = {'metriques': True, 'logs': False, 'traces': False}
-    assert fusionner(detections, 'or') == True
+**4 tests d'intégration** (dans `tests/test_integration.py`) qui testent le pipeline complet avec de vraies données. Pour ça, j'ai créé un mini-dataset de 2,7 Mo dans `tests/mini_data/` (une seule fenêtre : celle de la panne `return` du 29 janvier 2023). Ce mini-dataset est commité dans le repo pour que le CI puisse l'utiliser :
 
-def test_enregistrer_alerte(self, tmp_path):
-    """Test enregistrement d'une alerte."""
-    from pipeline.alertes import SystemeAlertes
-    fichier = tmp_path / "test_alertes.json"
-    alertes = SystemeAlertes(fichier_alertes=str(fichier))
+```python
+def test_detection_panne_return(self, config_test):
+    """Vérifie que le pipeline détecte l'anomalie connue."""
+    pipeline = PipelineComplet(systeme='train_ticket', config_path=config_test)
+    resultat = pipeline.traiter_fenetre('2023-01-29', '08_43')
     
-    alertes.enregistrer({
-        'systeme'  : 'train_ticket',
-        'severite' : 'WARNING',
-        # ...
-    })
-    
-    assert len(alertes.obtenir()) == 1
+    assert resultat['anomalie'] == True
+    assert resultat['severite'] in ['CRITICAL', 'WARNING', 'LOW']
 ```
 
-### 6.4 Résultats
+### 7.3 Résultats
+
+En local, l'exécution de tous les tests prend environ 4 secondes :
 
 ```
-============= 23 passed in 1.23s =============
+27 passed in 4s
 ```
 
-**Toutes les fonctions critiques du pipeline sont testées** :
-- 3 stratégies de fusion (or, vote_majoritaire, and)
-- 4 niveaux de classification
-- 4 niveaux de score de confiance
-- 4 actions recommandées
-- Création, enregistrement, statistiques d'alertes
-
-### 6.5 Couverture
-
-Les tests couvrent les fonctions **pures** (sans dépendance aux données ou modèles). Les tests d'intégration (avec vraies données Nezha) sont exclus car ils prendraient trop de temps en CI.
+C'est rapide, ce qui incite à lancer les tests souvent — bonne pratique.
 
 ---
 
-## 7. CI/CD — GitHub Actions
+## 8. Le pipeline CI/CD
 
-### 7.1 Motivation
+### 8.1 Pourquoi GitHub Actions
 
-Chaque push doit :
-1. Lancer les tests unitaires
-2. Vérifier la syntaxe Python
-3. Construire l'image Docker
-4. (Éventuellement) publier l'image
+- Intégré nativement à GitHub (aucune config externe)
+- Gratuit pour l'usage que j'en fais
+- Standard industriel largement documenté
+- Écosystème d'actions réutilisables
 
-**Automatisation** = pas d'erreur humaine, feedback immédiat.
+### 8.2 Les 5 jobs du pipeline
 
-### 7.2 Workflow `.github/workflows/ci.yml`
+Le workflow (`.github/workflows/ci.yml`) exécute 5 jobs à chaque push :
 
-```yaml
-name: CI/CD Pipeline
+**Job 1 — Lint (~10s)**
 
-on:
-  push:
-    branches: [main, develop, 'feature/**']
-  pull_request:
-    branches: [main, develop]
+Vérification de la qualité du code avec flake8. Détecte les erreurs de syntaxe (E9, F63, F7, F82) qui font échouer le pipeline, et signale les warnings de style sans bloquer.
 
-jobs:
-  test:
-    name: Tests unitaires
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: 'pip'
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install pytest pytest-cov
-      - name: Run tests
-        run: pytest tests/ -v --cov=pipeline
-      - name: Check syntax
-        run: python -m py_compile pipeline/*.py api/*.py dashboard/*.py
+**Job 2 — Tests unitaires (~1 min)**
 
-  build:
-    name: Build Docker Image
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - name: Build image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: false
-          tags: anomalie-detection:${{ github.sha }}
+Exécute les 23 tests unitaires avec pytest et génère un rapport de couverture. Ne se lance que si le lint passe.
+
+**Job 3 — Tests d'intégration (~1 min)**
+
+Exécute les 4 tests d'intégration avec le mini-dataset commité. Valide le comportement end-to-end.
+
+**Job 4 — Build & Push Docker (~3 min)**
+
+Construit l'image Docker avec Buildx, puis la publie sur GitHub Container Registry. L'image est taguée avec le nom de la branche, le SHA court du commit, et `latest` pour la branche par défaut. Un cache Docker est activé pour accélérer les builds successifs.
+
+**Job 5 — Déploiement simulé (<1s)**
+
+Simule un déploiement (affichage d'informations). Ne s'exécute que sur `main` et `develop`. Dans une vraie situation, ce job pousserait l'image sur un cluster Kubernetes ou un serveur.
+
+### 8.3 Bonnes pratiques appliquées
+
+Sans que ce soit forcément conscient au début, j'ai fini par appliquer plusieurs bonnes pratiques :
+
+- **Fail fast** : le lint tourne en premier pour détecter rapidement les erreurs triviales
+- **Séparation des tests** : unitaires (rapides) et intégration (avec données) dans des jobs distincts
+- **Dépendances explicites** : le build Docker ne se déclenche que si tous les tests passent
+- **Cache** : Docker Buildx utilise le cache GHA pour ne pas tout reconstruire à chaque fois
+
+Résultat : le pipeline complet s'exécute en environ **2 min 30s à 4 min 40s** selon si le cache est chaud.
+
+### 8.4 Le bug qui m'a occupé un moment
+
+Une fois, j'ai eu un pipeline qui échouait avec le message :
+```
+ERROR: failed to build: invalid tag "ghcr.io/eunicepris/intelligent_observability:-fdc68ae"
 ```
 
-### 7.3 Déclencheurs
+Le problème venait du fait que ma branche s'appelait `feature/pipeline-complet` (avec un slash), ce qui cassait la génération automatique des tags. Solution : utiliser `type=sha,format=short` au lieu de `type=sha,prefix={{branch}}-`.
 
-Le workflow se lance sur :
-- Push sur `main`, `develop`, ou branches `feature/*`
-- Pull request vers `main` ou `develop`
-
-### 7.4 Pipeline en 2 étapes
-
-**Étape 1 — Tests** :
-- Setup Python 3.12
-- Installation des dépendances
-- Exécution de pytest
-- Vérification de la syntaxe
-- **Bloque le pipeline si un test échoue**
-
-**Étape 2 — Build** :
-- Setup Docker Buildx
-- Construction de l'image
-- Cache Docker pour accélérer les builds futurs
-- **Ne se lance que si les tests passent** (`needs: test`)
-
-### 7.5 Push d'image (extension future)
-
-Le workflow peut être étendu pour publier automatiquement l'image sur GitHub Container Registry :
-
-```yaml
-- name: Login to GHCR
-  uses: docker/login-action@v3
-  with:
-    registry: ghcr.io
-    username: ${{ github.actor }}
-    password: ${{ secrets.GITHUB_TOKEN }}
-
-- name: Build and Push
-  uses: docker/build-push-action@v5
-  with:
-    context: .
-    push: true
-    tags: ghcr.io/${{ github.repository }}:latest
-```
+Petite leçon : les slashs dans les noms de branches peuvent poser problème avec certains outils, il faut y penser.
 
 ---
 
-## 8. Reproductibilité et déploiement
+## 9. Ce qui reste à améliorer
 
-### 8.1 Reproduire l'environnement complet
-
-```bash
-# 1. Cloner le projet
-git clone https://github.com/Eunicepris/Intelligent_observability.git
-cd Intelligent_observability
-
-# 2. Placer les données Nezha
-cp -r /path/to/nezha/rca_data data/anomalies
-cp -r /path/to/nezha/construct_data data/normal
-
-# 3. Lancer la plateforme
-docker-compose up -d
-
-# 4. Accéder aux interfaces
-# API      : http://localhost:8000/docs
-# Dashboard: http://localhost:8501
-```
-
-### 8.2 Reproduction des résultats
-
-Tous les résultats sont reproductibles à l'identique grâce à :
-- **Random state fixé** dans tous les algorithmes ML
-- **Version scikit-learn figée** dans requirements.txt
-- **Modèles pré-entraînés** versionnés dans le repo
-- **Données Nezha** publiques et documentées
-
-### 8.3 Portabilité
-
-La plateforme fonctionne sur :
-- Linux (testé sur Ubuntu 24)
-- macOS (via Docker Desktop)
-- Windows (via Docker Desktop)
-- Cloud (AWS, GCP, Azure) via images Docker
-
-### 8.4 Ressources requises
-
-**Minimum** :
-- 4 GB RAM
-- 5 GB espace disque (dont ~3 GB de données Nezha)
-- Docker 20.10+
-
-**Recommandé** :
-- 8 GB RAM
-- 10 GB espace disque
-- Docker 24.0+
-
----
-
-## 9. Limitations et perspectives
-
-### 9.1 Limitations actuelles
-
-1. **Pas de authentification** — l'API est ouverte
-2. **Pas de rate limiting** — vulnérable au flood
-3. **Alertes en JSON** — pas adapté à une production réelle (utiliser PostgreSQL)
-4. **CORS ouvert** — acceptable en académique, à restreindre en prod
-5. **Pas de logs structurés** — utiliser Loguru en production
-
-### 9.2 Perspectives d'amélioration
+Je documente honnêtement les limites actuelles :
 
 **Sécurité** :
-- Authentification JWT
-- HTTPS via Traefik/Nginx
-- Rate limiting avec Redis
+- Pas d'authentification sur l'API (elle est ouverte)
+- Pas de rate limiting
+- CORS ouvert (`allow_origins=["*"]`)
 
 **Observabilité** :
-- Métriques Prometheus
-- Traces distribuées (Jaeger)
-- Logs structurés
+- Pas de métriques Prometheus
+- Pas de traces distribuées
+- Les alertes vont juste dans un fichier JSON (pas de base de données)
 
 **Scalabilité** :
-- Kubernetes pour orchestration multi-nœuds
-- File d'attente Redis/RabbitMQ pour requêtes lourdes
-- Cache Redis pour résultats fréquents
-
-**Data pipeline** :
-- Ingestion Kafka en temps réel
-- Base de données time-series (InfluxDB, TimescaleDB)
-- Rétention et archivage automatiques
+- Docker Compose au lieu de Kubernetes
+- Un seul instance de chaque service
+- Pas de file d'attente pour requêtes lourdes
 
 **MLOps** :
-- Suivi des expériences (MLflow)
-- Détection de drift
-- Ré-entraînement automatique périodique
-- A/B testing des modèles
+- Pas de MLflow
+- Pas de détection de drift
+- Pas de réentraînement automatique
+
+Ces manques sont documentés dans la proposition initiale comme des ambitions qui n'ont pas pu être livrées dans le temps imparti. Ils constituent des perspectives d'évolution naturelles pour un développement futur du projet.
 
 ---
 
-## 10. Conclusion
+## 10. Ce que j'ai appris
 
-### 10.1 Bilan technique
+Cette phase "génie logiciel" du projet m'a beaucoup appris. Voici les principales choses :
 
-La plateforme construite constitue une **base solide** pour un système de détection d'anomalies en production. Elle réunit :
+**Sur l'architecture** :
+- L'importance de séparer les préoccupations (UI ≠ API ≠ logique métier)
+- Le pattern Facade pour cacher la complexité
+- L'injection de dépendances pour la testabilité
 
-- **Interface web utilisable** par des non-développeurs
-- **API programmatique** pour intégration dans d'autres outils
-- **Conteneurisation** pour déploiement portable
-- **Tests automatisés** pour garantir la qualité
-- **CI/CD** pour évoluer en toute confiance
+**Sur Docker** :
+- La différence entre `Docker Engine` et `Docker Desktop`
+- L'importance de figer les versions en ML
+- Comment gérer les volumes, les réseaux, les healthchecks
+- Pourquoi les liens symboliques posent problème dans le build context
 
-### 10.2 Statistiques du travail
+**Sur les APIs** :
+- FastAPI et son écosystème (Pydantic, lifespan, middleware)
+- L'importance des codes HTTP appropriés
+- Comment structurer un projet pour qu'il soit maintenable
 
-| Composante | Métrique |
-|------------|----------|
-| Endpoints API | 7 |
-| Lignes de code API | ~250 |
-| Lignes de code Dashboard | ~400 |
-| Onglets dashboard | 3 |
-| Tests unitaires | 23 |
-| Temps d'exécution des tests | 1.23 s |
-| Taille de l'image Docker | ~1.5 GB |
-| Services orchestrés | 2 |
+**Sur le CI/CD** :
+- Comment GitHub Actions fonctionne
+- L'importance des jobs séparés (fail fast)
+- Comment gérer le cache pour accélérer les builds
+- Le versionnement automatique des images Docker
 
-### 10.3 Contribution
+**Sur le refactoring** :
+- Il vaut mieux commencer simple et refactorer quand on comprend mieux le problème
+- Les tests permettent de refactorer en confiance
+- Ajouter du logging systématique change complètement l'expérience de développement
 
-Transformer un pipeline Python (script) en une **plateforme déployable** représente un travail d'ingénierie logicielle significatif :
-
-- **Ingénierie API** : conception REST, validation, documentation
-- **UI/UX** : conception d'un dashboard utilisable
-- **DevOps** : conteneurisation, orchestration, CI
-- **Qualité** : tests automatisés, revue de code
-- **Documentation** : rapports, README, docstrings
-
-Ces compétences transverses sont ce qui distingue **la recherche appliquée** d'un simple prototype.
-
-### 10.4 Valeur pédagogique
-
-Pour un projet de maîtrise en **génie logiciel**, cette plateforme démontre la maîtrise de :
-- Frameworks modernes (FastAPI, Streamlit)
-- Conteneurisation (Docker, docker-compose)
-- Tests automatisés (pytest)
-- CI/CD (GitHub Actions)
-- Bonnes pratiques (typing, validation, séparation des préoccupations)
-
-**Cette dimension "génie logiciel" complète la dimension "machine learning" pour un projet équilibré et professionnel.**
+Ce projet m'aura fait toucher à énormément de choses différentes en peu de temps. C'est une charge d'apprentissage importante mais c'est ce genre d'expérience qui fait grandir techniquement.
 
 ---
 
@@ -748,16 +730,18 @@ Pour un projet de maîtrise en **génie logiciel**, cette plateforme démontre l
 ```
 Intelligent_observability/
 ├── api/
-│   └── main.py                 API FastAPI (250 lignes)
+│   └── main.py                    # API FastAPI (255 lignes)
 ├── dashboard/
-│   └── app.py                  Dashboard Streamlit (400 lignes)
+│   └── app.py                     # Dashboard Streamlit (~400 lignes)
 ├── pipeline/
 │   ├── __init__.py
-│   ├── ingestion.py
-│   ├── detection.py
-│   ├── alertes.py
-│   ├── classification_type.py  Nouveau module ML
-│   └── main.py                 Pipeline orchestrateur
+│   ├── ingestion.py               # Chargement des données Nezha
+│   ├── detection.py               # LOF + TF-IDF + IF + fusion
+│   ├── classification_type.py     # Random Forest supervisé
+│   ├── alertes.py                 # Persistance JSON
+│   ├── main.py                    # Facade (PipelineComplet)
+│   ├── exceptions.py              # Hiérarchie d'exceptions
+│   └── logger.py                  # Configuration du logging
 ├── models/
 │   ├── lof_tt.pkl / lof_ob.pkl
 │   ├── tfidf_tt.pkl / tfidf_ob.pkl
@@ -765,10 +749,12 @@ Intelligent_observability/
 │   └── classifier_type_panne.pkl
 ├── tests/
 │   ├── __init__.py
-│   └── test_pipeline.py        23 tests unitaires
+│   ├── test_pipeline.py           # 23 tests unitaires
+│   ├── test_integration.py        # 4 tests d'intégration
+│   └── mini_data/                 # Mini-dataset pour CI (2,7 Mo)
 ├── .github/
 │   └── workflows/
-│       └── ci.yml              Workflow GitHub Actions
+│       └── ci.yml                 # Pipeline à 5 jobs
 ├── Dockerfile
 ├── docker-compose.yml
 ├── .dockerignore
@@ -790,8 +776,8 @@ streamlit run dashboard/app.py
 # Tests
 pytest tests/ -v
 
-# Démo
-python demo.py
+# Test end-to-end du pipeline
+python -m pipeline.main
 ```
 
 **Docker** :
@@ -799,14 +785,14 @@ python demo.py
 # Lancer tout
 docker-compose up -d
 
-# Voir les logs
+# Voir les logs en temps réel
 docker-compose logs -f api
 docker-compose logs -f dashboard
 
 # Arrêter
 docker-compose down
 
-# Reconstruire
+# Reconstruire (utile après modifications importantes)
 docker-compose build --no-cache
 docker-compose up -d
 ```
@@ -816,9 +802,9 @@ docker-compose up -d
 # Créer une branche feature
 git checkout -b feature/nouvelle-fonctionnalite
 
-# Commiter
+# Commiter avec message descriptif
 git add .
-git commit -m "feat: description du changement"
+git commit -m "feat: description claire"
 
 # Pusher
 git push origin feature/nouvelle-fonctionnalite
