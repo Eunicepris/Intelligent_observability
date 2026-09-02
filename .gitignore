@@ -55,3 +55,7 @@ captures_rapport/
 # Documentation de travail personnelle
 README_dataset_section.md
 tests/rapport_conftest.md
+
+# Anciens fichiers de requirements (backups)
+requirements.txt.OLD
+requirements.txt.bak
