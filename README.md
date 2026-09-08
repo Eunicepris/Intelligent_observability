@@ -59,8 +59,8 @@ Les principaux résultats obtenus pendant le projet sont :
 - **Isolation Forest** retenu pour les traces ;
 - fusion multimodale atteignant un **F1 jusqu’à 100 % sur les données évaluées** ;
 - classification supervisée du type de panne avec un **F1 pondéré de 63 %** ;
-- **64 tests automatisés** ;
-- **71 % de couverture globale** mesurée sur la version finale ;
+- **74 tests automatisés** ;
+- **83 % de couverture globale** mesurée sur la version finale ;
 - contrôles Flake8 automatisés ;
 - API REST avec six routes applicatives ;
 - dashboard Streamlit à trois onglets ;
@@ -377,9 +377,12 @@ Intelligent_observability/
 ├── results/
 │   └── rapports et résultats expérimentaux
 │
-├── tests/
-│   ├── mini_data/
+├── tests/                    Tests automatisés (74 tests, 83% de couverture)
+│   └── mini_data/            Échantillon versionné pour exécution sans Nezha
+│   ├── conftest.py           Fixtures et configuration de test
 │   ├── test_api.py
+    ├── test_api_erreurs.py
+    ├── test_dashboard.py
 │   ├── test_errors.py
 │   ├── test_integration.py
 │   ├── test_pipeline.py
@@ -572,21 +575,32 @@ Avec Docker Compose, un volume persistant permet de conserver les alertes entre 
 
 # Tests automatisés
 
-La version finale comprend **64 tests répartis dans cinq fichiers**.
+## Tests
 
-| Fichier | Tests | Objectif principal |
-|---|---:|---|
-| `test_pipeline.py` | 23 | Fusion, sévérité, confiance, actions et alertes |
-| `test_integration.py` | 4 | Scénarios d’intégration |
-| `test_api.py` | 10 | API REST et codes HTTP |
-| `test_pipeline_main.py` | 10 | Orchestration et traitement batch |
-| `test_errors.py` | 17 | Entrées invalides, configuration et cas limites |
-| **Total** | **64** | |
+Le projet contient 74 tests automatisés répartis dans 7 fichiers :
 
-Exécuter toute la suite :
+| Fichier | Tests | Objectif |
+|---|---|---|
+| test_pipeline.py | 23 | Fusion, sévérité, confiance, actions et alertes |
+| test_errors.py | 17 | Entrées invalides, configuration et cas limites |
+| test_api.py | 10 | Endpoints REST et codes HTTP |
+| test_pipeline_main.py | 10 | Orchestration, traitement batch, propagation des erreurs |
+| test_dashboard.py | 7 | Rendu des trois onglets Streamlit (AppTest) |
+| test_integration.py | 4 | Détection et classification sur données Nezha |
+| test_api_erreurs.py | 3 | Chemins d'erreur 400 et 500 de l'API |
+
+Couverture globale : **83%** — `api/main.py` à 97%, `dashboard/app.py` à 88%.
+
+Le dashboard est testé avec `streamlit.testing.v1.AppTest`, qui exécute le script
+dans un runtime Streamlit simulé, sans navigateur ni serveur. Les appels HTTP sont
+remplacés par des doubles de test, donc aucune API n'a besoin d'être démarrée.
+
+La suite s'exécute sur un clone frais du dépôt : si le dataset Nezha complet est
+absent, `conftest.py` bascule automatiquement sur l'échantillon `tests/mini_data/`.
 
 ```bash
 pytest tests/ -v
+pytest tests/ --cov=pipeline --cov=api --cov=dashboard --cov-report=term
 ```
 
 Mesurer la couverture :
@@ -598,8 +612,6 @@ pytest tests/ \
   --cov=dashboard \
   --cov-report=term-missing
 ```
-
-La version finale du projet a obtenu une couverture globale de **71 %**.
 
 Le dossier `tests/mini_data` permet d’exécuter les tests sans nécessiter le dataset Nezha complet.
 
