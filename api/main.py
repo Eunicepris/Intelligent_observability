@@ -239,16 +239,6 @@ def detecter_anomalie(requete: RequeteDetection) -> Dict[str, Any]:
 
     pipeline = pipelines[requete.systeme]
 
-    # try:
-    #     return pipeline.traiter_fenetre(requete.date, requete.window)
-
-    # except DataError as e:
-    #     # Données introuvables ou invalides
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         detail=f"Données introuvables : {e}",
-    #     )
-    # except (ModelError, PipelineError) as e:
 
     try:
         return pipeline.traiter_fenetre(requete.date, requete.window)

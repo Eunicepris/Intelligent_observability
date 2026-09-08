@@ -1,527 +1,950 @@
 # Intelligent Observability Platform
-## Détection d'anomalies dans les systèmes microservices
 
-> Projet technique de fin de Maîtrise — Génie Logiciel  
-> Université du Québec — 2026
+## Détection intelligente d’anomalies dans les systèmes microservices
 
----
-
-## Contexte
-
-Les architectures microservices modernes génèrent un volume important
-de données d'observabilité : logs applicatifs, métriques système et
-traces distribuées. Ce projet conçoit et implémente une plateforme
-intelligente capable de détecter automatiquement des anomalies dans
-ces systèmes sans intervention humaine.
+> Projet technique de fin de maîtrise en génie logiciel — MGL8707  
+> 2026
 
 ---
 
-## Objectifs
+## Présentation
 
-- Collecter et analyser des logs, métriques et traces
-- Détecter automatiquement des anomalies via des algorithmes de ML
-- Comparer les performances de détection sur deux systèmes différents
-- Évaluer les modèles avec précision, rappel et F1-score
-- **Construire un pipeline automatique déployable en production**
+Les architectures microservices génèrent plusieurs types de données d’observabilité, notamment les métriques, les logs et les traces distribuées. Lorsqu’un incident survient, ces informations peuvent être dispersées entre plusieurs services, ce qui rend le diagnostic difficile.
+
+Ce projet propose une plateforme d’observabilité intelligente permettant d’analyser à la demande une fenêtre de données microservices afin de :
+
+- détecter automatiquement des anomalies ;
+- combiner les résultats provenant des métriques, logs et traces ;
+- calculer un niveau de sévérité et de confiance ;
+- prédire le type de panne lorsqu’une anomalie est détectée ;
+- proposer une action de diagnostic ;
+- enregistrer et consulter les alertes ;
+- visualiser les résultats dans un dashboard ;
+- exposer les fonctionnalités par une API REST.
+
+La plateforme a été évaluée sur deux systèmes du dataset public **Nezha** : **Train Ticket** et **Online Boutique**.
+
+---
+
+## Fonctionnalités principales
+
+La version finale comprend :
+
+- détection multimodale sur les métriques, logs et traces ;
+- fusion des résultats des trois modalités ;
+- niveaux de sévérité `NORMAL`, `LOW`, `WARNING` et `CRITICAL` ;
+- classification supervisée du type de panne ;
+- estimation d’un niveau de confiance ;
+- recommandation d’une action générale et d’une action spécifique ;
+- persistance et filtrage des alertes ;
+- statistiques agrégées sur les alertes ;
+- API REST avec FastAPI ;
+- documentation Swagger interactive ;
+- dashboard Streamlit ;
+- utilisation directe du pipeline depuis Python ;
+- conteneurisation avec Docker et Docker Compose ;
+- tests automatisés ;
+- pipeline CI/CD avec GitHub Actions ;
+- publication de l’image Docker dans GitHub Container Registry.
 
 ---
 
 ## Résultats principaux
 
-- **Fusion multi-modale** : F1 = 100%
-- **Classification supervisée** : F1 = 63%
-- 64 tests automatisés avec 71% de couverture
-- 0 avertissement flake8 (code 100% conforme PEP 8)
-- **API REST sémantique** (200/400/404)
-- **21+ algorithmes** évalués et comparés
-- **Pipeline fonctionnel** avec API REST, dashboard interactif, Docker et CI/CD
+Les principaux résultats obtenus pendant le projet sont :
+
+- plus de **20 approches de détection** étudiées ;
+- **LOF** retenu pour les métriques ;
+- **TF-IDF** retenu pour les logs ;
+- **Isolation Forest** retenu pour les traces ;
+- fusion multimodale atteignant un **F1 jusqu’à 100 % sur les données évaluées** ;
+- classification supervisée du type de panne avec un **F1 pondéré de 63 %** ;
+- **74 tests automatisés** ;
+- **83 % de couverture globale** mesurée sur la version finale ;
+- contrôles Flake8 automatisés ;
+- API REST avec six routes applicatives ;
+- dashboard Streamlit à trois onglets ;
+- pipeline CI/CD à cinq jobs.
+
+Les performances indiquées correspondent aux données et scénarios évalués dans le cadre du projet académique. Elles ne constituent pas une garantie de performance sur un environnement de production différent.
 
 ---
 
-## Systèmes analysés
+## Systèmes étudiés
 
-| Système | Services | Langages | Pannes |
-|---------|----------|----------|--------|
-| **Train Ticket** | 41 microservices | Java Spring Boot | 45 cas |
-| **Online Boutique** | 10 microservices | Go, Python, Node.js | 56 cas |
-
----
-
-## Dataset
-
-**Nezha** — Yu et al., FSE 2023  
-- 3 modalités : Logs · Métriques (21 colonnes) · Traces distribuées  
-- 4 types de pannes : `return` · `exception` · `network_delay` · `cpu_contention`  
-- Fenêtre d'anomalie : 3 minutes par panne  
-- Lien : https://github.com/IntelligentDDS/Nezha
+| Système | Nombre de microservices | Technologies principales |
+|---|---:|---|
+| Train Ticket | 41 | Java / Spring Boot |
+| Online Boutique | 10 | Go, Python, Node.js et autres |
 
 ---
 
-## Architecture du projet
+## Dataset Nezha
 
-Intelligent_observability/
-├── notebooks/ Études comparatives (13 notebooks)
-│ ├── 01_TrainTicket.ipynb
-│ ├── 02_OnlineBoutique.ipynb
-│ ├── 03-10 : détection par modalité et fusion
-│ ├── 12_sauvegarde_modeles.ipynb
-│ ├── 13_analyse_localisation.ipynb
-│ └── 14_classification_type_panne.ipynb
-├── pipeline/ Modules Python du pipeline
-│ ├── ingestion.py Chargement des données
-│ ├── detection.py Détection + fusion + sévérité
-│ ├── classification_type.py Classification supervisée
-│ ├── alertes.py Gestion des alertes
-│ ├── main.py Orchestration (Facade)
-│ ├── exceptions.py Hiérarchie d'exceptions
-│ └── logger.py Configuration du logging
-├── models/ 7 modèles pré-entraînés (~44 MB)
-├── api/ API FastAPI
-├── dashboard/ Interface Streamlit
-├── tests/ Tests automatisés (27 tests)
-├── .github/workflows/ CI/CD GitHub Actions
-├── figures/ Graphiques générés
-├── results/ Rapports et résultats (11 rapports)
-├── data/ Dataset Nezha
-├── Dockerfile
-├── docker-compose.yml
-├── config.yaml Configuration centralisée
-├── requirements.txt Dépendances Python
-└── README.md
+Le projet utilise le dataset public **Nezha**, présenté par Yu et al. à ESEC/FSE 2023.
+
+Il fournit trois principales modalités d’observabilité :
+
+- métriques ;
+- logs ;
+- traces distribuées.
+
+Les données contiennent plusieurs catégories de pannes, notamment :
+
+- `return` ;
+- `exception` ;
+- `network_delay` ;
+- `cpu_contention` ;
+- `cpu_consumed`.
+
+Pour le classificateur final développé dans ce projet, les problèmes CPU sont regroupés dans la classe `cpu_problem`.
+
+Les quatre classes finales sont donc :
+
+```text
+cpu_problem
+network_delay
+exception
+return
+```
+
+Le dataset Nezha complet n’est pas inclus dans ce dépôt en raison de sa taille.
 
 ---
 
-## Installation
+# Démarrage rapide
+
+Le dépôt contient un petit jeu de données dans :
+
+```text
+tests/mini_data
+```
+
+Il permet de lancer rapidement la plateforme sans télécharger le dataset Nezha complet.
+
+## Prérequis
+
+Pour la méthode Docker recommandée :
+
+- Git ;
+- Docker ;
+- Docker Compose.
+
+Pour une exécution Python locale :
+
+- Python 3.10 ou supérieur ;
+- Python 3.12 recommandé.
+
+---
+
+## 1. Cloner le projet
 
 ```bash
-# Cloner le repo
-git clone https://github.com/Eunicepris/Intelligent_observability.git
+git clone <URL_DU_DEPOT>
 cd Intelligent_observability
-
-# Créer l'environnement virtuel
-python3 -m venv venv
-source venv/bin/activate
-
-# Installer les dépendances
-pip install -r requirements.txt
-
-# Télécharger le dataset Nezha
-git clone https://github.com/IntelligentDDS/Nezha.git /tmp/nezha
-
-# Copier les données au bon endroit (structure attendue par le code)
-mkdir -p data/normal data/anomalies
-cp -r /tmp/nezha/construct_data/* data/normal/
-cp -r /tmp/nezha/rca_data/* data/anomalies/
 ```
 
 ---
 
-## Utilisation du pipeline
-
-### 1. Utilisation programmatique
-
-```python
-from pipeline.main import PipelineComplet
-
-# Initialiser le pipeline
-pipeline = PipelineComplet(systeme='train_ticket')
-
-# Analyser une fenêtre
-resultat = pipeline.traiter_fenetre('2023-01-29', '08_43')
-
-print(f"Sévérité : {resultat['severite']}")     # WARNING
-print(f"Confiance : {resultat['confiance']*100:.0f}%")
-print(f"Action : {resultat['action']}")
-```
-
-### 2. API REST
-
-Lancer l'API :
+## 2. Lancer la plateforme avec Docker
 
 ```bash
-uvicorn api.main:app --reload
+docker compose up -d --build
 ```
 
-Endpoints :
+Si aucune variable `DATA_DIR` n’est définie, Docker Compose utilise automatiquement :
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/api/detecter` | Analyser une fenêtre |
-| GET | `/api/alertes` | Consulter les alertes |
-| GET | `/api/statistiques` | Statistiques globales |
-| GET | `/api/systemes` | Systèmes supportés |
-| GET | `/api/health` | Vérification de santé |
-| GET | `/docs` | Documentation Swagger |
+```text
+tests/mini_data
+```
 
-
-note:
-POST /api/detecter retourne :
-200 OK : détection réussie
-400 Bad Request : entrée invalide (ex: 24_89)
-404 Not Found : fenêtre absente du dataset
-
-Exemple :
+Vérifier l’état de l’API :
 
 ```bash
-curl -X POST http://localhost:8000/api/detecter \
-  -H "Content-Type: application/json" \
-  -d '{"systeme": "train_ticket", "date": "2023-01-29", "window": "08_43"}'
-```
-
-### 3. Dashboard Streamlit
-
-Lancer le dashboard (l'API doit être active) :
-
-```bash
-streamlit run dashboard/app.py
-```
-
-Accès : http://localhost:8501
-
-### 4. Déploiement avec Docker
-
-Lancer l'API et le dashboard ensemble :
-
-```bash
-docker-compose up -d
-```
-
-Accès :
-- Dashboard : http://localhost:8501
-- API : http://localhost:8000
-
----
-
-## Algorithmes utilisés
-
-Le pipeline utilise des algorithmes **non supervisés adaptatifs** :
-
-| Modalité | Algorithme | Rationale |
-|----------|-----------|-----------|
-| Métriques | LOF | Densité locale, adaptatif |
-| Logs | TF-IDF | Robuste, sans labels |
-| Traces | Isolation Forest par service | S'adapte à chaque service |
-
-Ces choix résultent d'une étude comparative de 21 algorithmes documentée dans les notebooks 03-10.
-
-Un **Random Forest** supervisé complète le pipeline pour classifier le type de panne parmi 4 catégories (voir notebook 14).
-
----
-
-## Classification en 4 niveaux
-
-| Niveau | Modalités confirmant | Action |
-|--------|---------------------|--------|
-| CRITICAL | 3/3 | Investigation immédiate |
-| WARNING | 2/3 | Investigation à planifier |
-| LOW | 1/3 | Vérifier la modalité |
-| NORMAL | 0/3 | Surveillance passive |
-
----
-
-## Résultats par type de panne
-
-| Type de panne | Signal principal | Modalité |
-|---------------|-----------------|---------|
-| `return` | Comportement applicatif anormal | Traces |
-| `exception` | Stack traces | Logs |
-| `cpu_contention` | CPU > 2x normale | Métriques |
-| `network_delay` | Latence P99 | Métriques + Traces |
-
----
-
-## Tests
-
-Le projet contient 64 tests automatisés répartis dans 4 fichiers :
-- test_pipeline.py : 23 tests unitaires (fonctions pures)
-- test_integration.py : 4 tests d'intégration (pipeline complet)
-- test_api.py : 10 tests d'API (endpoints HTTP)
-- test_pipeline_main.py : 10 tests d'orchestration
-- test_errors.py : 17 tests d'erreurs et cas limites
-
-Couverture : 71% global (89% pour l'API)
-
-```bash
-pytest tests/ -v
-```
-
----
-
-## Rapports détaillés
-
-Le dossier `results/` contient les rapports scientifiques du projet :
-
-- `rapport_complet_trainticket.md` — Étude Train Ticket
-- `rapport_complet_onlineboutique.md` — Étude Online Boutique
-- `rapport_algorithmes_robustes.md` — Analyse de robustesse (LOF, XGBoost)
-- `rapport_fusion_multimodale.md` — Fusion multi-modale
-- `rapport_classification_type_panne.md` — Classification supervisée du type de panne
-- `rapport_plateforme_deploiement.md` — API, dashboard, Docker, CI/CD
-- `rapport_pipeline_core.md` — Documentation du pipeline
-
----
-
-## Branches Git
-
-| Branche | Contenu | Statut |
-|---------|---------|--------|
-| `main` | Version stable finale | ✓ |
-| `develop` | Intégration des features | En cours |
-| `feature/exploration-data` | Notebooks d'exploration | ✓ Mergé |
-| `feature/detection-algorithmes` | 21 algorithmes évalués | ✓ Complet |
-| `feature/pipeline-complet` | Pipeline + API + Dashboard + Docker + CI/CD | En cours |
-
----
-
-## Technologies utilisées
-
-| Catégorie | Outils |
-|-----------|--------|
-| Langage | Python 3.12 |
-| Analyse | Pandas, NumPy |
-| Visualisation | Matplotlib, Seaborn, Plotly |
-| ML | Scikit-learn, XGBoost |
-| API | FastAPI, Uvicorn |
-| Dashboard | Streamlit |
-| Config | PyYAML |
-| Tests | pytest, pytest-cov |
-| Conteneurisation | Docker, docker-compose |
-| CI/CD | GitHub Actions |
-| Versionnement | Git, GitHub |
-| Environnement | Jupyter, venv |
-
----
-
-## Limitations connues
-
-1. **Localisation** — L'identification précise du service défaillant reste un problème ouvert (Top-1 = 11.9% avec les traces seules). Une extension avec analyse de graphe des dépendances est identifiée comme perspective future.
-
-2. **Baseline limitée** — Le dataset Nezha ne contient que 2 fenêtres normales pour logs et traces, limitant la calibration.
-
-3. **Apprentissage figé** — Les modèles ne s'adaptent pas automatiquement aux nouvelles données. Un re-entraînement périodique est recommandé.
-
----
-
-## Reproduire les résultats du rapport
-
-Cette section explique comment obtenir **exactement les mêmes résultats** que ceux présentés dans le rapport de projet MGL8707.
-
-### Contexte
-
-Le scénario principal du rapport (Section 3.3.5) présente l'analyse de la fenêtre `08_43` du 29 janvier 2023 sur Train Ticket, qui produit :
-
-| Élément | Valeur attendue |
-|---|---|
-| Sévérité | **WARNING** |
-| Confiance globale | **67%** (2/3 modalités) |
-| Métriques anormales | ✓ |
-| Logs anormaux | ✗ |
-| Traces anormales | ✓ |
-| Type de panne prédit | **return** |
-| Confiance du type | **90%** |
-| Action spécifique | Vérifier valeurs retournées par le service |
-
-Pour obtenir ces valeurs, il faut le **dataset Nezha complet** (~3 GB, non inclus dans le dépôt pour des raisons de taille et de licence).
-
-### Étape 1 — Télécharger le dataset Nezha
-
-```bash
-# Cloner le dépôt officiel Nezha (Yu et al., FSE 2023)
-git clone https://github.com/IntelligentDDS/Nezha.git /tmp/nezha
-```
-
-### Étape 2 — Organiser les données
-
-Le pipeline attend une structure spécifique :
-
-```bash
-# Créer la structure attendue
-mkdir -p ~/nezha_data/normal
-mkdir -p ~/nezha_data/anomalies
-
-# Copier les données normales (comportement de référence)
-cp -r /tmp/nezha/construct_data/* ~/nezha_data/normal/
-
-# Copier les données avec anomalies injectées
-cp -r /tmp/nezha/rca_data/* ~/nezha_data/anomalies/
-```
-
-Structure attendue :
-
-```
-~/nezha_data/
-├── normal/
-│   ├── 2023-01-29/
-│   │   ├── log/
-│   │   ├── metric/
-│   │   └── trace/
-│   └── 2023-01-30/
-└── anomalies/
-    ├── 2023-01-29/
-    │   ├── log/
-    │   ├── metric/
-    │   └── trace/
-    └── ...
-```
-
-### Étape 3 — Configurer le chemin avec .env
-
-```bash
-# Depuis la racine du projet
-cd Intelligent_observability
-
-# Copier le fichier d'exemple
-cp .env.example .env
-
-# Éditer .env avec l'éditeur de votre choix
-nano .env
-```
-
-Modifier la ligne dans `.env` avec le chemin **absolu** vers vos données :
-
-```
-DATA_DIR=/home/votre_utilisateur/nezha_data
-```
-
-### Étape 4 — Lancer la plateforme
-
-```bash
-# Redémarrer les conteneurs pour prendre en compte le .env
-docker-compose down
-docker-compose up -d
-
-# Attendre 30 secondes que les services démarrent
-sleep 30
-
-# Vérifier que tout est prêt
 curl http://localhost:8000/api/health
 ```
 
 Réponse attendue :
 
 ```json
-{"status": "healthy", "pipelines_charges": ["train_ticket", "online_boutique"]}
+{
+  "status": "healthy",
+  "pipelines_charges": [
+    "train_ticket",
+    "online_boutique"
+  ]
+}
 ```
 
-### Étape 5 — Reproduire le scénario du rapport
+Une fois les conteneurs démarrés :
+
+- Dashboard Streamlit : port `8501`
+- API FastAPI : port `8000`
+- Swagger : port `8000`, chemin `/docs`
+
+Arrêter l’application :
+
+```bash
+docker compose down
+```
+
+---
+
+## Important : mini-dataset et dataset complet
+
+Le mini-dataset fourni dans `tests/mini_data` sert principalement à :
+
+- vérifier rapidement le fonctionnement du projet ;
+- exécuter les tests automatisés ;
+- utiliser le projet dans le CI ;
+- développer sans télécharger plusieurs gigaoctets de données.
+
+Il ne reproduit pas nécessairement les résultats exacts du scénario présenté dans le rapport MGL8707.
+
+Pour reproduire les résultats du rapport, utiliser le dataset Nezha complet comme expliqué dans la section :
+
+**Reproduire le scénario du rapport**
+
+---
+
+# Architecture
+
+La plateforme utilise une architecture en couches.
+
+```text
+Clients
+│
+├── Dashboard Streamlit
+├── Swagger / API REST
+└── Scripts Python
+        │
+        ▼
+FastAPI
+        │
+        ▼
+PipelineComplet
+        │
+        ├── IngestionEngine
+        ├── DetecteurAnomalies
+        ├── ClassificateurTypePanne
+        └── SystemeAlertes
+                │
+                ▼
+Données Nezha / modèles / configuration / alertes
+```
+
+`PipelineComplet` joue le rôle de façade et orchestre les différentes étapes du traitement.
+
+---
+
+## Pipeline de traitement
+
+Pour une fenêtre donnée, le traitement suit principalement les étapes suivantes :
+
+```text
+Entrée
+  │
+  ▼
+Validation
+  │
+  ▼
+Ingestion
+  │
+  ├── Métriques
+  ├── Logs
+  └── Traces
+  │
+  ▼
+Détection multimodale
+  │
+  ▼
+Fusion
+  │
+  ▼
+Sévérité + confiance
+  │
+  ├── NORMAL
+  ├── LOW
+  ├── WARNING
+  └── CRITICAL
+  │
+  ▼
+Classification du type de panne
+(si anomalie)
+  │
+  ▼
+Action recommandée
+  │
+  ▼
+Enregistrement éventuel de l’alerte
+```
+
+---
+
+# Algorithmes utilisés
+
+## Détection multimodale
+
+| Modalité | Algorithme final | Rôle |
+|---|---|---|
+| Métriques | LOF | Détection d’anomalies selon la densité locale |
+| Logs | TF-IDF + similarité cosinus | Comparaison des contenus textuels |
+| Traces | Isolation Forest par service | Détection de comportements atypiques dans les traces |
+
+Ces choix résultent d’une phase expérimentale comparant plus de vingt approches.
+
+---
+
+## Fusion multimodale
+
+La plateforme combine les décisions produites par les trois modalités.
+
+Trois stratégies ont notamment été étudiées :
+
+- `or` ;
+- `vote_majoritaire` ;
+- `and`.
+
+La stratégie peut être configurée dans `config.yaml`.
+
+---
+
+## Sévérité
+
+La sévérité dépend du nombre de modalités signalant une anomalie.
+
+| Modalités anormales | Sévérité | Confiance |
+|---:|---|---:|
+| 0 / 3 | NORMAL | 0 % |
+| 1 / 3 | LOW | 33 % |
+| 2 / 3 | WARNING | 67 % |
+| 3 / 3 | CRITICAL | 100 % |
+
+Une détection `NORMAL` n’est pas enregistrée comme alerte.
+
+Les niveaux `LOW`, `WARNING` et `CRITICAL` peuvent produire une alerte persistante.
+
+---
+
+## Classification du type de panne
+
+Lorsqu’une anomalie est détectée, un modèle Random Forest prédit une classe parmi :
+
+```text
+cpu_problem
+network_delay
+exception
+return
+```
+
+Le résultat contient notamment :
+
+- le type prédit ;
+- la confiance ;
+- les probabilités de chaque classe ;
+- une action spécifique recommandée.
+
+Le F1 pondéré obtenu par ce classificateur sur les données évaluées est de **63 %**.
+
+---
+
+# Structure du projet
+
+```text
+Intelligent_observability/
+│
+├── api/
+│   └── main.py
+│
+├── dashboard/
+│   └── app.py
+│
+├── pipeline/
+│   ├── alertes.py
+│   ├── classification_type.py
+│   ├── detection.py
+│   ├── exceptions.py
+│   ├── ingestion.py
+│   ├── logger.py
+│   └── main.py
+│
+├── models/
+│   └── modèles pré-entraînés
+│
+├── notebooks/
+│   └── 13 notebooks expérimentaux
+│
+├── results/
+│   └── rapports et résultats expérimentaux
+│
+├── tests/                    Tests automatisés (74 tests, 83% de couverture)
+│   └── mini_data/            Échantillon versionné pour exécution sans Nezha
+│   ├── conftest.py           Fixtures et configuration de test
+│   ├── test_api.py
+    ├── test_api_erreurs.py
+    ├── test_dashboard.py
+│   ├── test_errors.py
+│   ├── test_integration.py
+│   ├── test_pipeline.py
+│   └── test_pipeline_main.py
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
+├── Dockerfile
+├── docker-compose.yml
+├── config.yaml
+├── pyproject.toml
+├── requirements.txt
+├── demo.py
+└── README.md
+```
+
+---
+
+# Utilisation locale avec Python
+
+## Installation
+
+Créer un environnement virtuel :
+
+```bash
+python3 -m venv venv
+```
+
+Linux/macOS :
+
+```bash
+source venv/bin/activate
+```
+
+Windows :
+
+```text
+venv\Scripts\activate
+```
+
+Installer les dépendances :
+
+```bash
+pip install -r requirements.txt
+```
+
+Python 3.12 est recommandé afin de rester cohérent avec l’environnement utilisé par le projet et le pipeline CI.
+
+---
+
+# Utilisation directe du pipeline
+
+Exemple :
+
+```python
+from pipeline.main import PipelineComplet
+
+pipeline = PipelineComplet(systeme="train_ticket")
+
+resultat = pipeline.traiter_fenetre(
+    "2023-01-29",
+    "08_43"
+)
+
+print(f"Sévérité : {resultat['severite']}")
+print(f"Confiance : {resultat['confiance'] * 100:.0f}%")
+print(f"Action : {resultat['action']}")
+```
+
+Le pipeline peut également être utilisé depuis les notebooks et les tests d’intégration.
+
+---
+
+# API REST
+
+Lancer l’API localement :
+
+```bash
+uvicorn api.main:app --reload
+```
+
+## Routes applicatives
+
+| Méthode | Route | Description |
+|---|---|---|
+| GET | `/` | Informations générales |
+| GET | `/api/health` | Vérification de l’état de l’API |
+| GET | `/api/systemes` | Liste des systèmes supportés |
+| POST | `/api/detecter` | Analyse d’une fenêtre |
+| GET | `/api/alertes` | Consultation et filtrage des alertes |
+| GET | `/api/statistiques` | Statistiques sur les alertes |
+
+La documentation Swagger interactive est générée automatiquement à :
+
+```text
+/docs
+```
+
+---
+
+## Exemple de détection
 
 ```bash
 curl -X POST http://localhost:8000/api/detecter \
   -H "Content-Type: application/json" \
-  -d '{"systeme": "train_ticket", "date": "2023-01-29", "window": "08_43"}' \
-  | python3 -m json.tool
+  -d '{
+    "systeme": "train_ticket",
+    "date": "2023-01-29",
+    "window": "08_43"
+  }'
 ```
 
-**Réponse attendue** (identique au rapport) :
+L’API distingue notamment :
 
-```json
-{
-  "systeme": "train_ticket",
-  "fenetre": "2023-01-29 08_43",
-  "anomalie": true,
-  "severite": "WARNING",
-  "confiance": 0.6667,
-  "modalites": {
-    "metriques": true,
-    "logs": false,
-    "traces": true
-  },
-  "type_panne": {
-    "type_predit": "return",
-    "confiance": 0.9,
-    "probabilites": {
-      "cpu_problem": 0.0,
-      "exception": 0.1,
-      "network_delay": 0.0,
-      "return": 0.9
-    },
-    "action_specifique": "Vérifier valeurs retournées par le service"
-  },
-  "action": "Alerte modérée — investigation à planifier"
-}
+```text
+200 → requête traitée correctement
+400 → entrée sémantiquement invalide
+404 → fenêtre ou données demandées absentes
+422 → validation structurelle FastAPI/Pydantic
+500 → erreur interne
 ```
 
-### Étape 6 — Utiliser le dashboard
+---
 
-**Accès** : http://localhost:8501
+# Dashboard Streamlit
 
-**Reproduction du scénario dans le dashboard** :
+Lancer le dashboard :
 
-1. Ouvrir l'onglet **Détection**
-2. Sélectionner :
-   - Système : `train_ticket`
-   - Date : `2023-01-29`
-   - Fenêtre : `08_43`
-3. Cliquer sur **Lancer l'analyse**
-4. Le résultat WARNING/return à 67% s'affiche
+```bash
+streamlit run dashboard/app.py
+```
 
-### Autres scénarios validés
+L’API doit être accessible pour que le dashboard puisse fonctionner.
 
-| Fenêtre (Train Ticket, 2023-01-29) | Sévérité attendue | Type de panne |
+Le dashboard comprend trois onglets :
+
+### Détection
+
+Permet de :
+
+- sélectionner un système ;
+- sélectionner une date ;
+- sélectionner une fenêtre ;
+- lancer une analyse ;
+- afficher la sévérité ;
+- visualiser le résultat des trois modalités ;
+- consulter le type de panne prédit ;
+- afficher les actions recommandées.
+
+### Alertes
+
+Permet de :
+
+- consulter l’historique des alertes ;
+- filtrer par système ;
+- filtrer par sévérité ;
+- limiter le nombre de résultats affichés.
+
+### Statistiques
+
+Affiche :
+
+- le nombre total d’alertes ;
+- leur répartition par système ;
+- leur répartition par niveau de sévérité.
+
+---
+
+# Alertes
+
+Les alertes sont persistées au format JSON.
+
+Une alerte contient notamment :
+
+- système ;
+- fenêtre analysée ;
+- horodatage ;
+- sévérité ;
+- confiance ;
+- modalités ;
+- services suspects éventuels ;
+- type de panne éventuel ;
+- action recommandée.
+
+Avec Docker Compose, un volume persistant permet de conserver les alertes entre les redémarrages des conteneurs.
+
+---
+
+# Tests automatisés
+
+## Tests
+
+Le projet contient 74 tests automatisés répartis dans 7 fichiers :
+
+| Fichier | Tests | Objectif |
 |---|---|---|
-| `08_43` | WARNING | return |
-| `24_89` | HTTP 400 (format invalide) | - |
-| `11_51` | HTTP 404 (fenêtre absente) | - |
+| test_pipeline.py | 23 | Fusion, sévérité, confiance, actions et alertes |
+| test_errors.py | 17 | Entrées invalides, configuration et cas limites |
+| test_api.py | 10 | Endpoints REST et codes HTTP |
+| test_pipeline_main.py | 10 | Orchestration, traitement batch, propagation des erreurs |
+| test_dashboard.py | 7 | Rendu des trois onglets Streamlit (AppTest) |
+| test_integration.py | 4 | Détection et classification sur données Nezha |
+| test_api_erreurs.py | 3 | Chemins d'erreur 400 et 500 de l'API |
 
-### Sans le dataset complet
+Couverture globale : **83%** — `api/main.py` à 97%, `dashboard/app.py` à 88%.
 
-Si vous ne pouvez pas télécharger Nezha, le projet fonctionne quand même avec le **mini-dataset intégré** (`tests/mini_data/`), mais les résultats seront différents :
+Le dashboard est testé avec `streamlit.testing.v1.AppTest`, qui exécute le script
+dans un runtime Streamlit simulé, sans navigateur ni serveur. Les appels HTTP sont
+remplacés par des doubles de test, donc aucune API n'a besoin d'être démarrée.
 
-- La fenêtre `08_43` retournera **LOW** au lieu de WARNING
-- La confiance sera plus faible (33% au lieu de 67%)
-- Le type de panne prédit peut varier
-- **La plateforme fonctionne normalement**, c'est juste que le dataset restreint donne moins de signal
+La suite s'exécute sur un clone frais du dépôt : si le dataset Nezha complet est
+absent, `conftest.py` bascule automatiquement sur l'échantillon `tests/mini_data/`.
 
-Ce mode est parfait pour :
-- Découvrir la plateforme rapidement
-- Développer de nouvelles fonctionnalités
-- Exécuter le CI/CD automatique
-- Faire des démos
-
-### Dépannage
-
-**Problème** : Après `docker-compose up`, l'API répond mais la détection retourne "fenêtre non trouvée".
-**Solution** : Vérifier que le chemin dans `.env` est correct :
 ```bash
-docker-compose config | grep -A 2 volumes
-# Doit afficher le vrai chemin de vos données
+pytest tests/ -v
+pytest tests/ --cov=pipeline --cov=api --cov=dashboard --cov-report=term
 ```
 
-**Problème** : Résultats différents de ceux du rapport.
-**Solution** : Vérifier que `.env` existe et pointe vers Nezha complet. Redémarrer :
+Mesurer la couverture :
+
 ```bash
-docker-compose down && docker-compose up -d
+pytest tests/ \
+  --cov=pipeline \
+  --cov=api \
+  --cov=dashboard \
+  --cov-report=term-missing
 ```
 
-**Problème** : `.env` n'est pas pris en compte.
-**Solution** : Vérifier que `.env` est bien à la racine du projet (même dossier que `docker-compose.yml`) et redémarrer.
-
-## Perspectives futures
-
-- Analyse de graphe pour améliorer la localisation
-- Streaming temps réel (Kafka)
-- Base de données pour les alertes (PostgreSQL)
-- Notifications (email, Slack, PagerDuty)
-- Pipeline MLOps (MLflow, drift detection)
-- Authentification et rate limiting sur l'API
+Le dossier `tests/mini_data` permet d’exécuter les tests sans nécessiter le dataset Nezha complet.
 
 ---
 
-## Références
+# Qualité du code
 
-- Yu et al. (2023). *Nezha: Interpretable Fine-Grained Root Causes Analysis for Microservices on Multi-Modal Observability Data*. FSE 2023.
-- FudanSELab. *Train Ticket: A Benchmark Microservice System*. https://github.com/FudanSELab/train-ticket
-- GoogleCloudPlatform. *Online Boutique*. https://github.com/GoogleCloudPlatform/microservices-demo
+Le projet utilise notamment :
+
+- Flake8 ;
+- pytest ;
+- pytest-cov ;
+- configuration Black ;
+- configuration isort.
+
+Le pipeline CI effectue une première vérification bloquante des erreurs Python critiques.
+
+Une deuxième vérification Flake8 analyse également les aspects de style et de complexité en mode non bloquant.
+
+Les configurations de formatage sont centralisées dans `pyproject.toml`.
 
 ---
 
-## Auteur
+# CI/CD
 
-**Eunice** — Master 2 Génie Logiciel  
-GitHub : [@Eunicepris](https://github.com/Eunicepris)
+GitHub Actions automatise les principales validations du projet.
+
+Le workflow comprend cinq jobs :
+
+```text
+1. Lint code Python
+       │
+       ▼
+2. Tests unitaires ─────┐
+                        │
+3. Tests intégration ───┤
+                        ▼
+4. Build & Push Docker Image
+                        │
+                        ▼
+5. Déploiement simulé
+```
+
+Les tests unitaires et les tests d’intégration peuvent s’exécuter en parallèle après le lint.
+
+Lorsque les validations réussissent :
+
+1. Docker Buildx construit l’image ;
+2. l’image est publiée dans GitHub Container Registry ;
+3. des tags permettent de relier l’image au code correspondant ;
+4. le workflow termine par une simulation de déploiement.
+
+La dernière étape est volontairement une **simulation** : aucun déploiement automatique vers un environnement Kubernetes ou de production n’est effectué dans la version actuelle.
 
 ---
 
-## Description courte
+# Configuration
 
-Projet de fin de maîtrise : conception et déploiement d'une plateforme cloud-native d'observabilité intelligente intégrant Machine Learning, DevOps et MLOps.
+Les principaux paramètres sont regroupés dans :
+
+```text
+config.yaml
+```
+
+La configuration comprend notamment :
+
+- chemin vers les données ;
+- fichier d’alertes ;
+- stratégie de fusion ;
+- paramètres associés aux systèmes et à la détection.
+
+La configuration est partiellement externalisée. L’ajout d’un nouveau système nécessite encore des modèles adaptés et certaines modifications du code.
+
+---
+
+# Reproduire le scénario du rapport MGL8707
+
+Le scénario principal du rapport utilise :
+
+```text
+Système : Train Ticket
+Date : 2023-01-29
+Fenêtre : 08_43
+```
+
+Avec le dataset Nezha complet utilisé pendant le projet, le résultat attendu est :
+
+| Élément | Résultat |
+|---|---|
+| Anomalie | Oui |
+| Sévérité | WARNING |
+| Confiance globale | environ 67 % |
+| Métriques | Anormales |
+| Logs | Normaux |
+| Traces | Anormales |
+| Type prédit | `return` |
+| Confiance classification | 90 % |
+
+Ces valeurs ne sont pas nécessairement reproduites avec `tests/mini_data`.
+
+---
+
+## 1. Télécharger Nezha
+
+Cloner le dépôt officiel **IntelligentDDS/Nezha** dans un emplacement local.
+
+Exemple :
+
+```bash
+git clone <URL_DU_DEPOT_OFFICIEL_NEZHA> /tmp/nezha
+```
+
+---
+
+## 2. Préparer les données
+
+Créer une structure de ce type :
+
+```text
+nezha_data/
+├── normal/
+│   ├── 2023-01-29/
+│   └── 2023-01-30/
+│
+└── anomalies/
+    ├── 2023-01-29/
+    └── ...
+```
+
+Copier :
+
+```text
+construct_data → normal/
+rca_data       → anomalies/
+```
+
+Par exemple :
+
+```bash
+mkdir -p ~/nezha_data/normal
+mkdir -p ~/nezha_data/anomalies
+
+cp -r /tmp/nezha/construct_data/* ~/nezha_data/normal/
+cp -r /tmp/nezha/rca_data/* ~/nezha_data/anomalies/
+```
+
+---
+
+## 3. Configurer Docker
+
+Copier le fichier d’exemple :
+
+```bash
+cp .env.example .env
+```
+
+Modifier ensuite `.env` :
+
+```text
+DATA_DIR=/chemin/absolu/vers/nezha_data
+```
+
+Le fichier `.env` est local et ne doit pas être versionné.
+
+---
+
+## 4. Redémarrer la plateforme
+
+```bash
+docker compose down
+docker compose up -d --build
+```
+
+Vérifier :
+
+```bash
+curl http://localhost:8000/api/health
+```
+
+Puis lancer le scénario :
+
+```bash
+curl -X POST http://localhost:8000/api/detecter \
+  -H "Content-Type: application/json" \
+  -d '{
+    "systeme": "train_ticket",
+    "date": "2023-01-29",
+    "window": "08_43"
+  }'
+```
+
+---
+
+# Rapports expérimentaux
+
+Le dossier `results/` conserve les principaux rapports produits pendant l’expérimentation.
+
+Il contient notamment des analyses concernant :
+
+- Train Ticket ;
+- Online Boutique ;
+- comparaison des algorithmes ;
+- robustesse et généralisation ;
+- fusion multimodale ;
+- classification du type de panne ;
+- pipeline logiciel ;
+- plateforme et déploiement.
+
+Les notebooks associés sont disponibles dans `notebooks/`.
+
+---
+
+# Notebooks
+
+Le projet contient **13 notebooks expérimentaux**.
+
+Ils couvrent notamment :
+
+- exploration de Train Ticket ;
+- exploration d’Online Boutique ;
+- analyse des métriques ;
+- analyse des logs ;
+- analyse des traces ;
+- comparaison des algorithmes ;
+- fusion multimodale ;
+- sauvegarde des modèles ;
+- localisation ;
+- classification du type de panne.
+
+Les notebooks constituent la partie expérimentale du projet. Le code de l’application finale se trouve principalement dans `pipeline/`, `api/` et `dashboard/`.
+
+---
+
+# Technologies
+
+| Catégorie | Technologies |
+|---|---|
+| Langage | Python 3.12 |
+| Données | Pandas, NumPy |
+| Machine Learning | Scikit-learn |
+| API | FastAPI, Uvicorn, Pydantic |
+| Dashboard | Streamlit, Plotly |
+| Configuration | PyYAML |
+| Tests | pytest, pytest-cov |
+| Qualité | Flake8 |
+| Conteneurisation | Docker, Docker Compose |
+| CI/CD | GitHub Actions |
+| Versionnement | Git, GitHub |
+| Expérimentation | Jupyter Notebook |
+
+---
+
+# Limites actuelles
+
+La plateforme constitue un prototype fonctionnel et non une solution de monitoring de production complète.
+
+Les principales limites sont :
+
+1. **Analyse à la demande**  
+   La plateforme analyse des fenêtres temporelles sélectionnées par l’utilisateur. Elle ne traite pas actuellement un flux continu en temps réel.
+
+2. **Deux systèmes supportés**  
+   La version finale prend en charge Train Ticket et Online Boutique. Ajouter un nouveau système nécessite de nouveaux modèles et certaines adaptations.
+
+3. **Pas de cycle MLOps automatisé**  
+   Le projet ne comprend pas encore de détection automatique de dérive, de réentraînement automatique ni de registre de modèles.
+
+4. **Pas de déploiement Kubernetes final**  
+   Le pipeline CI/CD construit et publie l’image Docker, mais la dernière étape de déploiement est simulée.
+
+5. **Pas d’authentification**  
+   L’API et le dashboard ne mettent pas encore en œuvre de mécanisme d’authentification ou d’autorisation.
+
+6. **Dataset de test réduit**  
+   `tests/mini_data` permet de vérifier le fonctionnement logiciel mais n’est pas destiné à reproduire toutes les performances expérimentales du dataset complet.
+
+7. **Localisation de la cause**  
+   La localisation précise du service responsable d’une anomalie reste moins robuste que la détection globale et constitue une perspective d’amélioration.
+
+---
+
+# Perspectives
+
+Les principales évolutions possibles sont :
+
+- ingestion continue via OpenTelemetry ;
+- traitement streaming ;
+- Kafka ou technologie équivalente ;
+- déploiement Kubernetes ;
+- infrastructure as code ;
+- observabilité de la plateforme elle-même ;
+- suivi des modèles ;
+- détection de dérive ;
+- réentraînement automatisé ;
+- versionnement et registre des modèles ;
+- authentification et contrôle d’accès ;
+- amélioration de la localisation de la cause racine ;
+- déduplication et gestion avancée des alertes.
+
+Ces éléments constituent des perspectives et ne font pas partie du périmètre final implémenté.
+
+---
+
+# Branche de remise
+
+La branche :
+
+```text
+main
+```
+
+contient la version stable utilisée pour la remise du projet.
+
+---
+
+# Référence principale
+
+Le dataset utilisé est associé à l’article :
+
+> G. Yu, P. Chen, Y. Li, H. Chen, X. Li et Z. Zheng,  
+> “Nezha: Interpretable Fine-Grained Root Causes Analysis for Microservices on Multi-modal Observability Data”,  
+> ESEC/FSE 2023.
+
+---
+
+# Licence
+
+Ce projet est distribué selon les conditions précisées dans le fichier `LICENSE`.
+
+---
+
+# Auteur
+
+Projet technique de fin de maîtrise en génie logiciel.
+
+**Intelligent Observability Platform — 2026**
